@@ -168,12 +168,13 @@ select.pick:focus{outline:2px solid var(--blue);outline-offset:-1px}
 .fgrid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
 label.f{display:block}
 label.f > span{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:5px}
-input[type=text],textarea{
+input[type=text],textarea,select.f-select{
   width:100%;font:400 14px "Figtree",sans-serif;color:var(--text);background:var(--card);
   border:1px solid var(--line-2);border-radius:4px;padding:8px 11px;
 }
-input[type=text]:hover,textarea:hover{border-color:var(--faint)}
-input[type=text]:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+select.f-select{height:36px;cursor:pointer}
+input[type=text]:hover,textarea:hover,select.f-select:hover{border-color:var(--faint)}
+input[type=text]:focus,textarea:focus,select.f-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
 textarea{resize:vertical;line-height:1.5}
 #paste{min-height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
@@ -347,7 +348,7 @@ tr.detail:hover td{background:var(--card)}
   .btn.primary{padding:0 14px}
   select.pick{height:38px}
   .fgrid{grid-template-columns:1fr}
-  input[type=text],textarea,.noteedit,.sedit,select.pick{font-size:16px} /* stop iOS auto-zoom on focus */
+  input[type=text],textarea,.noteedit,.sedit,select.pick,select.f-select{font-size:16px} /* stop iOS auto-zoom on focus */
 
   .scroller{overflow-x:visible}
   table.bd{min-width:0;width:100%;border-spacing:0}
@@ -433,7 +434,7 @@ tr.detail:hover td{background:var(--card)}
     </div>
     <div class="card-body">
       <div class="fgrid">
-        <label class="f"><span>Period</span><input type="text" id="period" placeholder="August 2026"></label>
+        <label class="f"><span>Period</span><select id="period" class="f-select"></select></label>
         <label class="f"><span>Your name in Jira</span><input type="text" id="owner" placeholder="Timothy Cocores"></label>
         <label class="f"><span>Jira browse URL (optional)</span><input type="text" id="jiraBase" placeholder="https://your-jira/browse/"></label>
       </div>
@@ -1652,7 +1653,7 @@ tr.detail:hover td{background:var(--card)}
           return r;
         });
         state.open={};state.period=m.period||"";state.note=m.note||"";
-        $("period").value=state.period;$("note").value=state.note;
+        ensurePeriodValue(state.period);$("note").value=state.note;
         render();note("Loaded "+(m.period||"saved month")+".");
       }else{
         list.splice(+d.dataset.drop,1);
@@ -1673,6 +1674,24 @@ tr.detail:hover td{background:var(--card)}
   });
 
   /* ---------------- wiring ---------------- */
+  function monthLabel(d){ return d.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
+  function ensurePeriodValue(v){
+    var sel=$("period");
+    var has=Array.prototype.some.call(sel.options,function(o){return o.value===v;});
+    if(!has && v){
+      var opt=document.createElement("option");
+      opt.value=v;opt.textContent=v;
+      sel.insertBefore(opt, sel.firstChild);
+    }
+    sel.value=v;
+  }
+  function buildPeriodOptions(){
+    var sel=$("period"), base=new Date(), opts=[];
+    for(var i=3;i>=-12;i--){
+      opts.push(monthLabel(new Date(base.getFullYear(), base.getMonth()+i, 1)));
+    }
+    sel.innerHTML=opts.map(function(o){return '<option value="'+esc(o)+'">'+esc(o)+'</option>';}).join("");
+  }
   function pull(){
     state.period=$("period").value.trim();
     state.owner=$("owner").value.trim();
@@ -1680,7 +1699,8 @@ tr.detail:hover td{background:var(--card)}
     state.note=$("note").value;
     state.groupBy=$("groupBy").value;
   }
-  ["period","owner","jiraBase","note"].forEach(function(id){
+  $("period").addEventListener("change",function(){pull();render();});
+  ["owner","jiraBase","note"].forEach(function(id){
     $(id).addEventListener("input",function(){pull();render();});
   });
   $("groupBy").addEventListener("change",function(){pull();state.closed={};render();});
@@ -1757,11 +1777,12 @@ tr.detail:hover td{background:var(--card)}
   $("btnSample").addEventListener("click",function(){
     $("paste").value=SAMPLE;
     if(!$("owner").value)$("owner").value="Timothy Cocores";
-    if(!$("period").value)$("period").value="August 2026";
+    if(!$("period").value)ensurePeriodValue(monthLabel(new Date()));
     ingest(false);
   });
 
-  $("period").value=new Date().toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  buildPeriodOptions();
+  ensurePeriodValue(monthLabel(new Date()));
   $("btnMine").innerHTML='<span class="ico">◍</span> Person: everyone';
   $("ovl").hidden=true;
   document.body.style.overflow="";
