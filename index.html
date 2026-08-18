@@ -337,6 +337,39 @@ tr.detail:hover td{background:var(--card)}
   .fgrid{grid-template-columns:1fr}
   .w.wide{grid-column:span 1}
 }
+
+/* ---------- mobile board (card layout instead of a wide table) ---------- */
+@media (max-width:680px){
+  .shell{padding:14px 12px 60px}
+  .bhead h1{font-size:21px}
+  .toolbar{gap:6px}
+  .btn{height:38px;padding:0 12px}
+  .btn.primary{padding:0 14px}
+  select.pick{height:38px}
+  .fgrid{grid-template-columns:1fr}
+  input[type=text],textarea,.noteedit,.sedit,select.pick{font-size:16px} /* stop iOS auto-zoom on focus */
+
+  .scroller{overflow-x:visible}
+  table.bd{min-width:0;width:100%;border-spacing:0}
+  table.bd thead{display:none}
+  table.bd,table.bd tbody,table.bd tr,table.bd td{display:block;width:100%}
+  table.bd tr{position:relative;padding:10px 66px 12px 14px;border-bottom:1px solid var(--line)}
+  table.bd tr.detail{display:none;padding:0}
+  table.bd tr.detail.on{display:block}
+  table.bd tr:last-child{border-bottom:0}
+  table.bd td{border-bottom:0;height:auto;padding:5px 0}
+  table.bd td.bar{position:absolute;left:0;top:0;bottom:0;width:4px;height:auto}
+  table.bd td.name{padding:0 0 6px;font-weight:600}
+  table.bd td.bub{position:absolute;top:8px;right:36px;width:auto;padding:0}
+  table.bd tr:not(.detail) td:last-child{position:absolute;top:6px;right:8px;width:auto;padding:0}
+  table.bd .del{opacity:1}
+  table.bd td[data-label]{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:30px}
+  table.bd td[data-label]::before{content:attr(data-label);font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;flex:0 0 auto}
+  table.bd td.status .statuscell{width:auto;height:26px;padding:0 12px;border-radius:4px}
+  table.bd td.mid .people{justify-content:flex-end}
+  table.bd tr.detail td[colspan]{padding:0}
+  .additem{padding:12px 14px}
+}
 @media (prefers-reduced-motion:no-preference){
   .group{animation:fade .3s ease backwards}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -465,6 +498,7 @@ tr.detail:hover td{background:var(--card)}
     problem:"What we were solving",done:"What shipped",impact:"Impact to watch"};
   var UID = 0;
   var CREW = [["wo","WO"],["qa","QA"],["ux","UX"],["pm","PM"]];
+  var PLABEL = {reporter:"Reporter",wo:"WO",qa:"QA",ux:"UX",pm:"PM"};
   var PRI = {P1:{c:"var(--red)"},P2:{c:"var(--orange)"},P3:{c:"var(--lblue)"},P4:{c:"var(--teal)"}};
   var GCOL = ["var(--blue)","var(--green)","var(--purple)","var(--orange)","var(--pink)","var(--lblue)","var(--indigo)","var(--teal)"];
   var AVCOL = ["#0073EA","#00C875","#A25DDC","#FDAB3D","#E2445C","#579BFC","#6161FF","#00A9A5","#FF158A","#7E3B8A"];
@@ -777,11 +811,11 @@ tr.detail:hover td{background:var(--card)}
           '<td class="name"><div contenteditable="plaintext-only" data-i="'+i+'" data-f="summary">'+esc(r.summary||"")+'</div>'+keyHtml+
             (isMine?' <span class="pill" style="background:#E3FCEF;color:#00854D;height:18px;font-size:11px">yours</span>':"")+'</td>'+
           bubbleCell(r)+
-          '<td class="status"><button class="statuscell '+(pk?"":"empty")+'" data-pri="'+i+'" style="background:'+(pk?PRI[pk].c:"#C4C4C4")+'">'+esc(r.priority||"Set")+'</button></td>'+
+          '<td class="status" data-label="Priority"><button class="statuscell '+(pk?"":"empty")+'" data-pri="'+i+'" style="background:'+(pk?PRI[pk].c:"#C4C4C4")+'">'+esc(r.priority||"Set")+'</button></td>'+
           personCell(r,"reporter",i)+personCell(r,"wo",i)+personCell(r,"qa",i)+personCell(r,"ux",i)+personCell(r,"pm",i)+
-          '<td><div contenteditable="plaintext-only" data-i="'+i+'" data-f="portfolio">'+esc(r.portfolio)+'</div></td>'+
-          '<td>'+(r.sprint?'<span class="pill spr">'+esc(r.sprint)+'</span>':'<div contenteditable="plaintext-only" data-i="'+i+'" data-f="sprint" style="color:var(--faint)">—</div>')+'</td>'+
-          '<td>'+(r.fix?'<span class="pill rel">'+esc(r.fix)+'</span>':'<div contenteditable="plaintext-only" data-i="'+i+'" data-f="fix" style="color:var(--faint)">—</div>')+'</td>'+
+          '<td data-label="Portfolio"><div contenteditable="plaintext-only" data-i="'+i+'" data-f="portfolio">'+esc(r.portfolio)+'</div></td>'+
+          '<td data-label="Sprint">'+(r.sprint?'<span class="pill spr">'+esc(r.sprint)+'</span>':'<div contenteditable="plaintext-only" data-i="'+i+'" data-f="sprint" style="color:var(--faint)">—</div>')+'</td>'+
+          '<td data-label="Release">'+(r.fix?'<span class="pill rel">'+esc(r.fix)+'</span>':'<div contenteditable="plaintext-only" data-i="'+i+'" data-f="fix" style="color:var(--faint)">—</div>')+'</td>'+
           '<td><button class="del no-print" data-del="'+i+'" title="Delete item">×</button></td>'+
         '</tr>'+ storyRow(r,i,col);
       });
@@ -830,7 +864,7 @@ tr.detail:hover td{background:var(--card)}
 
   function personCell(r,f,i){
     var v = r[f];
-    return '<td class="mid"><div class="people"><span contenteditable="plaintext-only" data-i="'+i+'" data-f="'+f+'" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">'+esc(v)+'</span>'+
+    return '<td class="mid" data-label="'+esc(PLABEL[f])+'"><div class="people"><span contenteditable="plaintext-only" data-i="'+i+'" data-f="'+f+'" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0">'+esc(v)+'</span>'+
       '<button class="del2" data-person="'+i+'|'+f+'" style="border:0;background:transparent;cursor:pointer;padding:0" title="'+esc(LABELS[f])+': '+esc(v||"unassigned")+' — click to edit">'+avatar(v,LABELS[f])+'</button></div></td>';
   }
   /* ---------------- charts ---------------- */
@@ -1152,14 +1186,18 @@ tr.detail:hover td{background:var(--card)}
       var i=+pri.dataset.pri, rect=pri.getBoundingClientRect();
       var pop=document.createElement("div");
       pop.className="pop";
+      pop.style.visibility="hidden";
       pop.innerHTML = ["P1","P2","P3","P4"].map(function(k){
         return '<button style="background:'+PRI[k].c+'" data-set="'+i+'|'+k+'">'+k+'</button>';
       }).join("")+'<button class="clear" data-set="'+i+'|">Clear</button>';
-      pop.style.left=(rect.left+window.scrollX)+"px";
-      pop.style.top=(rect.bottom+window.scrollY+4)+"px";
       document.body.appendChild(pop);
-      var r2=pop.getBoundingClientRect();
-      if(r2.right>window.innerWidth-8) pop.style.left=(window.innerWidth-r2.width-12+window.scrollX)+"px";
+      var pw=pop.offsetWidth, ph=pop.offsetHeight;
+      var left=Math.max(8, Math.min(rect.left, window.innerWidth-pw-8));
+      var top=rect.bottom+4;
+      if(top+ph>window.innerHeight-8) top=Math.max(8, rect.top-ph-4);
+      pop.style.left=(left+window.scrollX)+"px";
+      pop.style.top=(top+window.scrollY)+"px";
+      pop.style.visibility="";
       return;
     }
 
