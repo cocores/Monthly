@@ -173,7 +173,7 @@ select.pick:focus{outline:2px solid var(--blue);outline-offset:-1px}
 
 /* ---------- cards ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-.card-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.card-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
 .card-head h2{font-size:16px;font-weight:700}
 .card-head .hint{font-size:12.5px;color:var(--faint);margin-left:auto}
 .card-body{padding:18px}
@@ -297,6 +297,15 @@ tr:hover .del{opacity:1}
 }
 .additem:hover{color:var(--blue);background:var(--hover)}
 
+/* ---------- star (year-end report) ---------- */
+td.star{width:38px;padding:0;text-align:center}
+.starbtn{
+  border:0;background:transparent;cursor:pointer;padding:4px;border-radius:6px;line-height:0;
+  transition:background var(--ease),transform var(--ease);
+}
+.starbtn:hover{background:#FFF6DA;transform:scale(1.08)}
+.starbtn svg{display:block}
+
 /* ---------- per-item story ---------- */
 td.bub{width:42px;padding:0;text-align:center}
 .bubble{
@@ -399,20 +408,23 @@ tr.detail:hover td{background:var(--card)}
   select.pick{height:38px}
   .fgrid{grid-template-columns:1fr}
   input[type=text],textarea,.noteedit,.sedit,select.pick,select.f-select{font-size:16px} /* stop iOS auto-zoom on focus */
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab{white-space:nowrap;flex:0 0 auto}
 
   .scroller{overflow-x:visible}
   table.bd{min-width:0;width:100%;border-spacing:0}
   table.bd thead{display:none}
   table.bd,table.bd tbody,table.bd tr,table.bd td{display:block;width:100%}
-  table.bd tr{position:relative;padding:10px 66px 12px 14px;border-bottom:1px solid var(--line)}
+  table.bd tr{position:relative;padding:10px 92px 12px 14px;border-bottom:1px solid var(--line)}
   table.bd tr.detail{display:none;padding:0}
   table.bd tr.detail.on{display:block}
   table.bd tr:last-child{border-bottom:0}
   table.bd td{border-bottom:0;height:auto;padding:5px 0}
   table.bd td.bar{position:absolute;left:0;top:0;bottom:0;width:4px;height:auto}
   table.bd td.name{padding:0 0 6px;font-weight:600}
-  table.bd td.bub{position:absolute;top:8px;right:36px;width:auto;padding:0}
-  table.bd tr:not(.detail) td:last-child{position:absolute;top:6px;right:8px;width:auto;padding:0}
+  table.bd td.star{position:absolute;top:8px;right:62px;width:auto;padding:0}
+  table.bd td.bub{position:absolute;top:8px;right:34px;width:auto;padding:0}
+  table.bd tr:not(.detail) td:last-child{position:absolute;top:6px;right:6px;width:auto;padding:0}
   table.bd .del{opacity:1}
   table.bd td[data-label]{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:30px}
   table.bd td[data-label]::before{content:attr(data-label);font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;flex:0 0 auto}
@@ -457,6 +469,7 @@ tr.detail:hover td{background:var(--card)}
     <button class="tab on" data-view="board">Main board</button>
     <button class="tab" data-view="dash">Dashboard</button>
     <button class="tab" data-view="updates">Updates</button>
+    <button class="tab" data-view="year">Year in review</button>
   </div>
 
   <div class="toolbar no-print">
@@ -515,6 +528,7 @@ tr.detail:hover td{background:var(--card)}
   <div id="updates"></div>
   <div id="charts"></div>
   <div id="feed"></div>
+  <div id="yearview"></div>
 
   <div class="card no-print" id="archive" hidden style="margin-top:22px">
     <div class="card-head"><h2>Saved months</h2><button class="btn outline" id="btnSave" style="margin-left:auto">Save this month</button></div>
@@ -559,6 +573,7 @@ tr.detail:hover td{background:var(--card)}
   var CREW = [["wo","WO"],["qa","QA"],["ux","UX"],["pm","PM"]];
   var PLABEL = {reporter:"Reporter",wo:"WO",qa:"QA",ux:"UX",pm:"PM"};
   var EICON = '<div class="eicon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5h6a1 1 0 011 1V6H8V4.5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 12.5l2 2 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+  var EICON_STAR = '<div class="eicon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.35 1.05 6.15L12 16.9l-5.45 3.1 1.05-6.15L3.2 9.5l6.1-.9L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>';
   var PRI = {P1:{c:"var(--red)"},P2:{c:"var(--orange)"},P3:{c:"var(--lblue)"},P4:{c:"var(--teal)"}};
   var GCOL = ["var(--blue)","var(--green)","var(--purple)","var(--orange)","var(--pink)","var(--lblue)","var(--indigo)","var(--teal)"];
   var AVCOL = ["#0073EA","#00C875","#A25DDC","#FDAB3D","#E2445C","#579BFC","#6161FF","#00A9A5","#FF158A","#7E3B8A"];
@@ -580,6 +595,43 @@ tr.detail:hover td{background:var(--card)}
     return '<span class="av" title="'+esc((title?title+": ":"")+n)+'" style="background:'+AVCOL[hash(norm(n).toLowerCase())%AVCOL.length]+'">'+esc(initials(n))+'</span>';
   }
   function priKey(p){var m=/([1-4])/.exec(p||"");return m?"P"+m[1]:null;}
+
+  /* ---------------- year-end report (starred items) ---------------- */
+  var YEAR_KEY="board:yearend";
+  function yearId(r){
+    return norm(r.key) ? "k:"+norm(r.key).toLowerCase() : "p:"+norm(state.period).toLowerCase()+"|"+norm(r.summary).toLowerCase();
+  }
+  function loadYear(){
+    try{ var v=window.localStorage.getItem(YEAR_KEY); return v?JSON.parse(v):[]; }catch(e){ return []; }
+  }
+  function saveYear(list){ try{ window.localStorage.setItem(YEAR_KEY, JSON.stringify(list)); }catch(e){} }
+  function isStarred(r, set){ return set ? !!set[yearId(r)] : loadYear().some(function(e){return e.id===yearId(r);}); }
+  function toggleStar(rowId){
+    var r=null; for(var k=0;k<state.rows.length;k++){ if(state.rows[k]._id===rowId){ r=state.rows[k]; break; } }
+    if(!r) return;
+    var list=loadYear(), id=yearId(r), idx=-1;
+    list.forEach(function(e,k){ if(e.id===id) idx=k; });
+    if(idx>-1) list.splice(idx,1);
+    else list.unshift({id:id,key:r.key,summary:r.summary,priority:r.priority,period:state.period,
+      portfolio:r.portfolio,reporter:r.reporter,fix:r.fix,sprint:r.sprint,
+      problem:r.problem,done:r.done,impact:r.impact});
+    saveYear(list);
+    updateYearTab(list.length);
+  }
+  function starSvg(on){
+    return '<svg width="18" height="18" viewBox="0 0 20 20" fill="'+(on?"var(--yellow)":"none")+'">'+
+      '<path d="M10 2.4l2.35 4.76 5.25.76-3.8 3.7.9 5.23L10 14.35l-4.7 2.5.9-5.23-3.8-3.7 5.25-.76L10 2.4z" '+
+      'stroke="'+(on?"var(--yellow)":"#C3C6D4")+'" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+  function starCell(r, yearSet){
+    var on=isStarred(r, yearSet);
+    return '<td class="star"><button class="starbtn'+(on?" on":"")+'" data-star="'+r._id+'" title="'+
+      (on?"Starred for the year-end report — click to remove":"Star for the year-end report")+'">'+starSvg(on)+'</button></td>';
+  }
+  function updateYearTab(n){
+    var tab=document.querySelector('.tab[data-view="year"]');
+    if(tab) tab.textContent="Year in review"+(n?" ("+n+")":"");
+  }
 
   /* ---------------- parsing ---------------- */
   var KEY_RE = /^[A-Z][A-Z0-9]+-\d+$/;
@@ -840,6 +892,7 @@ tr.detail:hover td{background:var(--card)}
         '<p>Copy the rows out of your Jira table and paste them into board setup. Every cell stays editable afterwards. Try <b>Load sample</b> to see the shape first.</p></div>';
       $("updates").innerHTML=""; return;
     }
+    var yearSet={}; loadYear().forEach(function(e){ yearSet[e.id]=true; });
     var html = "";
     grouped(rows).forEach(function(g,gi){
       var col = GCOL[gi%GCOL.length];
@@ -853,7 +906,7 @@ tr.detail:hover td{background:var(--card)}
         '<span class="gcount">'+g.rows.length+' item'+(g.rows.length===1?"":"s")+'</span>'+
       '</div>';
       html += '<div class="gwrap"><div class="scroller"><table class="bd"><thead><tr>'+
-        '<th style="width:6px;padding:0"></th><th>Item</th><th class="mid bubh" title="What we were solving, what shipped, impact">Writeup</th><th class="mid">Priority</th>'+
+        '<th style="width:6px;padding:0"></th><th>Item</th><th class="mid" title="Star for the year-end report">Star</th><th class="mid bubh" title="What we were solving, what shipped, impact">Writeup</th><th class="mid">Priority</th>'+
         '<th class="mid">Reporter</th><th class="mid">WO</th><th class="mid">QA</th><th class="mid">UX</th><th class="mid">PM</th>'+
         '<th>Portfolio</th><th>Sprint</th><th>Release</th><th style="width:34px"></th></tr></thead><tbody>';
 
@@ -870,6 +923,7 @@ tr.detail:hover td{background:var(--card)}
           '<td class="bar" style="background:'+col+'"></td>'+
           '<td class="name"><div contenteditable="plaintext-only" data-i="'+i+'" data-f="summary">'+esc(r.summary||"")+'</div>'+keyHtml+
             (isMine?' <span class="pill" style="background:#E3FCEF;color:#00854D;height:18px;font-size:11px">yours</span>':"")+'</td>'+
+          starCell(r, yearSet)+
           bubbleCell(r)+
           '<td class="status" data-label="Priority"><button class="statuscell '+(pk?"":"empty")+'" data-pri="'+i+'" style="background:'+(pk?PRI[pk].c:"#C4C4C4")+'">'+esc(r.priority||"Set")+'</button></td>'+
           personCell(r,"reporter",i)+personCell(r,"wo",i)+personCell(r,"qa",i)+personCell(r,"ux",i)+personCell(r,"pm",i)+
@@ -915,7 +969,7 @@ tr.detail:hover td{background:var(--card)}
     };
     return '<tr class="detail'+(open?" on":"")+(filled?"":" blank")+'" data-row="'+r._id+'">'+
       '<td class="bar" style="background:'+col+'"></td>'+
-      '<td colspan="12"><div class="story">'+
+      '<td colspan="13"><div class="story">'+
         box("why","problem","The problem, the complaint, the number that was off. Why this was worth a sprint.")+
         box("did","done","What we actually built and where it lives now.")+
         box("imp","impact","The metric or behavior to check next month.")+
@@ -1123,6 +1177,78 @@ tr.detail:hover td{background:var(--card)}
     host.innerHTML = html;
   }
 
+  function renderYear(){
+    var host=$("yearview"), list=loadYear();
+    updateYearTab(list.length);
+    if(!list.length){
+      host.innerHTML = '<div class="empty">'+EICON_STAR+'<h3>No starred items yet</h3>'+
+        '<p>Click the star next to any ticket on the main board to save it here for your end-of-year report — it stays even after you build next month\'s board.</p></div>';
+      return;
+    }
+    var byPeriod={}, order=[];
+    list.forEach(function(e){
+      var p=e.period||"No period";
+      if(!byPeriod[p]){byPeriod[p]=[];order.push(p);}
+      byPeriod[p].push(e);
+    });
+    order.sort(function(a,b){ return (Date.parse(b)||0)-(Date.parse(a)||0); });
+
+    var html = '<div class="card" style="margin-top:16px"><div class="card-head">'+
+      '<h2>End of year report</h2>'+
+      '<span class="hint">'+list.length+' starred item'+(list.length===1?"":"s")+' across '+order.length+' month'+(order.length===1?"":"s")+'</span>'+
+      '<button class="btn outline no-print" id="btnYearMd">Copy as Markdown</button>'+
+      '<button class="btn outline no-print" id="btnYearCsv">Download CSV</button>'+
+    '</div></div>';
+
+    html += '<div class="feedwrap" style="margin-top:16px">';
+    order.forEach(function(p){
+      html += '<div class="fgroup">'+esc(p)+' · '+byPeriod[p].length+' item'+(byPeriod[p].length===1?"":"s")+'</div>';
+      byPeriod[p].forEach(function(e){
+        var pk=priKey(e.priority);
+        html += '<div class="fitem"><div class="fhead"><div>'+
+          '<div class="ft">'+esc(e.summary||"Untitled")+'</div>'+
+          (e.key?'<span class="fk">'+esc(e.key)+'</span>':'')+'</div>'+
+          '<div class="right">'+
+            (pk?'<span class="pill" style="background:'+PRI[pk].c+';color:#fff">'+esc(e.priority)+'</span>':"")+
+            (e.fix?'<span class="pill rel">'+esc(e.fix)+'</span>':"")+
+            '<button class="bubble no-print" data-unstar="'+esc(e.id)+'" title="Remove from the year-end report">'+starSvg(true)+'</button>'+
+          '</div></div>'+
+          (norm(e.problem)||norm(e.done)||norm(e.impact) ? '<div class="fbody">'+
+            (norm(e.problem)?'<div class="sbox why"><div class="slabel">'+esc(LABELS.problem)+'</div><div class="sedit">'+esc(e.problem)+'</div></div>':"")+
+            (norm(e.done)?'<div class="sbox did"><div class="slabel">'+esc(LABELS.done)+'</div><div class="sedit">'+esc(e.done)+'</div></div>':"")+
+            (norm(e.impact)?'<div class="sbox imp"><div class="slabel">'+esc(LABELS.impact)+'</div><div class="sedit">'+esc(e.impact)+'</div></div>':"")+
+          '</div>' : '')+
+        '</div>';
+      });
+    });
+    html += '</div>';
+    host.innerHTML = html;
+
+    var b1=$("btnYearMd"); if(b1) b1.addEventListener("click",function(){ copy(yearMarkdown(list,order,byPeriod), this); });
+    var b2=$("btnYearCsv"); if(b2) b2.addEventListener("click",function(){ download("year-end-report.csv", yearCsv(list), "text/csv"); });
+  }
+  function yearMarkdown(list,order,byPeriod){
+    var out=["# End of year report"];
+    order.forEach(function(p){
+      out.push(""); out.push("## "+p+" ("+byPeriod[p].length+")");
+      byPeriod[p].forEach(function(e){
+        var line="- **"+(e.key||"—")+"**"+(e.priority?" · "+e.priority:"")+" · "+(e.summary||"Untitled");
+        out.push(line);
+        ["problem","done","impact"].forEach(function(f){
+          if(norm(e[f])) out.push("  - *"+LABELS[f]+":* "+String(e[f]).replace(/\n+/g," "));
+        });
+      });
+    });
+    return out.join("\n");
+  }
+  function yearCsv(list){
+    var fields=["period","key","priority","summary","portfolio","reporter","fix","sprint","problem","done","impact"];
+    var q=function(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+    var lines=[fields.map(function(f){return f==="fix"?"Fix Version/s":f.charAt(0).toUpperCase()+f.slice(1);}).join(",")];
+    list.forEach(function(e){ lines.push(fields.map(function(f){return q(e[f]);}).join(",")); });
+    return lines.join("\n");
+  }
+
   function setView(v){
     state.view = v;
     var tabs = document.querySelectorAll(".tab");
@@ -1132,15 +1258,17 @@ tr.detail:hover td{background:var(--card)}
 
   function render(){
     renderHead();
-    var b = state.view==="board", d = state.view==="dash", u = state.view==="updates";
+    var b = state.view==="board", d = state.view==="dash", u = state.view==="updates", y = state.view==="year";
     $("dash").style.display = b?"":"none";
     $("board").style.display = b?"":"none";
     $("updates").style.display = b?"":"none";
     $("charts").style.display = d?"":"none";
     $("feed").style.display = u?"":"none";
+    $("yearview").style.display = y?"":"none";
     if(b){ renderDash(); renderBoard(); }
     else if(d){ renderCharts(); }
-    else { renderFeed(); }
+    else if(u){ renderFeed(); }
+    else { renderYear(); }
   }
 
   /* ---------------- interactions ---------------- */
@@ -1199,6 +1327,21 @@ tr.detail:hover td{background:var(--card)}
       showUndoToast("Deleted "+(removed.summary||removed.key||"item")+".", function(){
         state.rows.splice(Math.min(di,state.rows.length),0,removed); render();
       });
+      return;
+    }
+
+    var st = t.closest && t.closest("[data-star]");
+    if(st){
+      toggleStar(st.dataset.star);
+      if(state.view==="year") renderYear(); else renderBoard();
+      return;
+    }
+
+    var us = t.closest && t.closest("[data-unstar]");
+    if(us){
+      var list=loadYear(), rid=us.dataset.unstar;
+      list=list.filter(function(e){return e.id!==rid;});
+      saveYear(list); updateYearTab(list.length); renderYear();
       return;
     }
 
@@ -1872,6 +2015,7 @@ tr.detail:hover td{background:var(--card)}
   pull();
   setView("board");
   drawIdx();
+  updateYearTab(loadYear().length);
 })();
 </script>
 </body>
