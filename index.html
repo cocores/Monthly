@@ -481,6 +481,7 @@ tr.detail:hover td{background:var(--card)}
       <option value="portfolio">Group by portfolio</option>
       <option value="priority">Group by priority</option>
       <option value="reporter">Group by reporter</option>
+      <option value="pm">Group by product manager</option>
       <option value="none">No grouping</option>
     </select>
     <button class="btn" id="btnMine"><span class="ico">◍</span> Person: me only</button>
@@ -816,6 +817,7 @@ tr.detail:hover td{background:var(--card)}
       case "portfolio": return r.portfolio||"No portfolio";
       case "priority": return r.priority||"No priority";
       case "reporter": return r.reporter||"No reporter";
+      case "pm": return r.pm||"No product manager";
       case "none": return "All items";
       default: return r.fix||"No release";
     }
