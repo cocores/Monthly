@@ -448,6 +448,7 @@ tr.detail:hover td{background:var(--card)}
       <button class="mtab" data-x="wiki">Confluence markup</button>
       <button class="mtab" data-x="storage">Storage format</button>
       <button class="mtab" data-x="other">Markdown, CSV, print</button>
+      <button class="mtab" data-x="email">Email</button>
     </div>
     <div class="mbody" id="mBody"></div>
   </div>
@@ -1480,8 +1481,24 @@ tr.detail:hover td{background:var(--card)}
         '<div class="othercard"><div class="oc"><b>CSV</b><span>Every column including the three writeup fields. Re-import it next month and the writeups come back.</span></div><button class="btn outline" id="xCsv">Download</button></div>'+
         '<div class="othercard"><div class="oc"><b>Print or save as PDF</b><span>Prints whichever tab you\'re on — board, dashboard charts, or the updates narrative.</span></div><button class="btn outline" id="xPrint">Open</button></div>'+
       '</div>';
+    },
+    email: function(){
+      return '<div class="steps"><strong>Browsers can\'t attach a file to an email draft on their own</strong>'+
+        '<ol><li>Click <strong>Download report</strong> to save the monthly report.</li>'+
+        '<li>Click <strong>Open email draft</strong> — your mail app opens with the subject and body already filled in.</li>'+
+        '<li>Attach the file you downloaded (drag it in, or use the mail app\'s attach button) and send.</li></ol></div>'+
+        '<div class="mrow"><button class="btn primary" id="xEmailFile">Download report (.html)</button>'+
+        '<button class="btn outline" id="xEmailOpen">Open email draft</button></div>'+
+        '<div class="preview"><div class="plabel">Email preview</div>'+
+        '<p style="margin:0 0 10px"><strong>Subject:</strong> '+esc(EMAIL_SUBJECT)+'</p>'+
+        '<p style="white-space:pre-wrap;margin:0">'+esc(EMAIL_BODY)+'</p></div>';
     }
   };
+  var EMAIL_SUBJECT = "Monthly report";
+  var EMAIL_BODY = "Hello Product Ops,\n\nPlease find the monthly report attached.";
+  function mailtoLink(){
+    return "mailto:?subject="+encodeURIComponent(EMAIL_SUBJECT)+"&body="+encodeURIComponent(EMAIL_BODY);
+  }
 
   function copyRich(html, plain, btn){
     var label = btn.textContent;
@@ -1535,6 +1552,12 @@ tr.detail:hover td{background:var(--card)}
     bind("xTxt", function(){ copy(plaintext(), this); });
     bind("xCsv", function(){ download("delivery-board-"+slug()+".csv", csv(), "text/csv"); });
     bind("xPrint", function(){ closeExport(); setTimeout(function(){ window.print(); }, 120); });
+    bind("xEmailFile", function(){
+      download("monthly-report-"+slug()+".html",
+        '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Monthly report</title></head><body style="margin:28px">'+cHTML()+'</body></html>',
+        "text/html");
+    });
+    bind("xEmailOpen", function(){ window.location.href = mailtoLink(); });
   }
   function slug(){ return (state.period||"export").replace(/\s+/g,"-").toLowerCase(); }
 
