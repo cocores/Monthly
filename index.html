@@ -484,6 +484,9 @@ tr.detail:hover td{background:var(--card)}
       <option value="pm">Group by product manager</option>
       <option value="none">No grouping</option>
     </select>
+    <select class="pick" id="filterPm" title="Filter by product manager">
+      <option value="">All product managers</option>
+    </select>
     <button class="btn" id="btnMine"><span class="ico">◍</span> Person: me only</button>
     <button class="btn" id="btnStories"><span class="ico">▤</span> Open all writeups</button>
     <button class="btn" id="btnMissing"><span class="ico">!</span> Needs a writeup</button>
@@ -579,7 +582,7 @@ tr.detail:hover td{background:var(--card)}
   var GCOL = ["var(--blue)","var(--green)","var(--purple)","var(--orange)","var(--pink)","var(--lblue)","var(--indigo)","var(--teal)"];
   var AVCOL = ["#0073EA","#00C875","#A25DDC","#FDAB3D","#E2445C","#579BFC","#6161FF","#00A9A5","#FF158A","#7E3B8A"];
 
-  var state = {rows:[], period:"", owner:"", jiraBase:"", note:"", groupBy:"fix", mineOnly:false, closed:{}, open:{}, view:"board"};
+  var state = {rows:[], period:"", owner:"", jiraBase:"", note:"", groupBy:"fix", mineOnly:false, pmFilter:"", closed:{}, open:{}, view:"board"};
 
   var $ = function(id){return document.getElementById(id);};
   var esc = function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
@@ -808,8 +811,26 @@ tr.detail:hover td{background:var(--card)}
 
   /* ---------------- derived ---------------- */
   function visibleRows(){
-    if(!state.mineOnly||!state.owner) return state.rows;
-    return state.rows.filter(function(r){return same(r.reporter,state.owner)||same(r.pm,state.owner);});
+    var rows = state.rows;
+    if(state.mineOnly && state.owner) rows = rows.filter(function(r){return same(r.reporter,state.owner)||same(r.pm,state.owner);});
+    if(state.pmFilter) rows = rows.filter(function(r){return same(r.pm,state.pmFilter);});
+    return rows;
+  }
+  function pmOptionsList(){
+    var seen={}, out=[];
+    state.rows.forEach(function(r){
+      var v=norm(r.pm);
+      if(v && !seen[v.toLowerCase()]){ seen[v.toLowerCase()]=true; out.push(v); }
+    });
+    return out.sort(function(a,b){return a.localeCompare(b);});
+  }
+  function refreshPmFilter(){
+    var sel=$("filterPm"), names=pmOptionsList(), cur=state.pmFilter;
+    var keep = cur && names.some(function(n){return same(n,cur);});
+    sel.innerHTML = '<option value="">All product managers</option>'+
+      names.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join("");
+    sel.value = keep ? cur : "";
+    if(!keep && cur){ state.pmFilter=""; }
   }
   function groupKeyOf(r){
     switch(state.groupBy){
@@ -1260,6 +1281,7 @@ tr.detail:hover td{background:var(--card)}
 
   function render(){
     renderHead();
+    refreshPmFilter();
     var b = state.view==="board", d = state.view==="dash", u = state.view==="updates", y = state.view==="year";
     $("dash").style.display = b?"":"none";
     $("board").style.display = b?"":"none";
@@ -1930,6 +1952,7 @@ tr.detail:hover td{background:var(--card)}
     $(id).addEventListener("input",function(){pull();render();});
   });
   $("groupBy").addEventListener("change",function(){pull();state.closed={};render();});
+  $("filterPm").addEventListener("change",function(){ state.pmFilter=this.value; state.closed={}; render(); });
   $("btnMine").addEventListener("click",function(){
     state.mineOnly=!state.mineOnly;
     this.classList.toggle("on",state.mineOnly);
