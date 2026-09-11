@@ -2,6 +2,8 @@
 
 A single-page tool for turning a pasted Jira ticket export into a monthly delivery board: a "what shipped this month" report you can review, write up, and share.
 
+Sign-in is required — with an **@BHphoto.com email address** — before the board is shown. See **Cloud sync** below.
+
 Paste ticket rows (tab/comma/pipe-separated, or a raw Jira multi-line export) and it builds:
 
 - **Main board** — items grouped by release, sprint, portfolio, priority, or reporter, with per-item writeups (problem / what shipped / impact to watch) and inline editing of every cell.
@@ -28,6 +30,22 @@ Shared storage runs on a serverless API route (`api/team.js`) backed by Vercel K
 2. Redeploy. Vercel injects `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically — no other config needed.
 
 Without a KV store linked, Push/Pull show a message explaining shared storage isn't set up yet; everything else in the app works exactly the same.
+
+### Cloud sync (Firebase)
+
+The whole app sits behind a sign-in screen (email + password, via Firebase Authentication), restricted to **@BHphoto.com** addresses — enforced both client-side (the form rejects other domains before ever calling Firebase) and by Firestore's own security rules (`firestore.rules`), so it holds even if the client-side check is bypassed. New accounts get a verification email and can't use the app until they click it.
+
+Once signed in, your **saved months** and **starred items** (the same two things `Save this month` and the star/"Year in review" feature already persist locally) also sync to your own Firestore document, so they follow you to any browser or device you sign into. The current, in-progress (unsaved) board stays local-only, same as always — nothing new is auto-saved. Signing in for the first time on a browser that already has a cloud copy asks before overwriting what's in that browser, the same way `Pull from team` does.
+
+This is entirely separate from the team-code sharing feature above — that's unaffected and still works exactly as described.
+
+To enable this on your own Firebase project:
+
+1. Firebase Console → **Authentication** → **Sign-in method** → enable **Email/Password**.
+2. Firebase Console → **Firestore Database** → **Create database**.
+3. Paste `firestore.rules`'s contents into the Firestore **Rules** tab and publish.
+
+The Firebase web config is inlined directly in `index.html` (these values are public client identifiers by Firebase's own design — the security rules above are what actually restrict access, not hiding this config).
 
 ## Running it
 

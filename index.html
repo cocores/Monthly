@@ -185,14 +185,14 @@ select.pick:focus{outline:2px solid var(--blue);outline-offset:-1px}
 .fgrid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
 label.f{display:block}
 label.f > span{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:5px}
-input[type=text],textarea,select.f-select{
+input[type=text],input[type=email],input[type=password],textarea,select.f-select{
   width:100%;font:400 14px "Figtree",sans-serif;color:var(--text);background:var(--card);
   border:1px solid var(--line-2);border-radius:7px;padding:8px 11px;
   transition:border-color var(--ease),box-shadow var(--ease);
 }
 select.f-select{height:36px;cursor:pointer}
-input[type=text]:hover,textarea:hover,select.f-select:hover{border-color:var(--faint)}
-input[type=text]:focus,textarea:focus,select.f-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,115,234,.14)}
+input[type=text]:hover,input[type=email]:hover,input[type=password]:hover,textarea:hover,select.f-select:hover{border-color:var(--faint)}
+input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,textarea:focus,select.f-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,115,234,.14)}
 textarea{resize:vertical;line-height:1.5}
 #paste{min-height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
@@ -412,7 +412,7 @@ tr.detail:hover td{background:var(--card)}
   .btn.primary{padding:0 14px}
   select.pick{height:38px}
   .fgrid{grid-template-columns:1fr}
-  input[type=text],textarea,.noteedit,.sedit,select.pick,select.f-select{font-size:16px} /* stop iOS auto-zoom on focus */
+  input[type=text],input[type=email],input[type=password],textarea,.noteedit,.sedit,select.pick,select.f-select{font-size:16px} /* stop iOS auto-zoom on focus */
   .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .tab{white-space:nowrap;flex:0 0 auto}
 
@@ -463,6 +463,49 @@ tr.detail:hover td{background:var(--card)}
 </style>
 </head>
 <body>
+
+<!-- ---------------- sign-in gate ----------------
+     Visible by default (fails closed) until Firebase resolves the auth
+     state; hidden only once signed in with a verified @BHphoto.com account. -->
+<div class="ovl no-print" id="authGate" role="dialog" aria-label="Sign in">
+  <div class="modal" style="width:min(380px,100%)">
+    <div class="mhead"><h2>Monthly Delivery Board</h2></div>
+    <div class="card-body">
+
+      <div id="authLoading"><p class="hint">Loading…</p></div>
+
+      <form id="authLoginForm" hidden>
+        <label class="f"><span>Work email</span>
+          <input type="email" id="authEmail" placeholder="you@bhphoto.com" autocomplete="email" required>
+        </label>
+        <label class="f" style="margin-top:12px"><span>Password</span>
+          <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" required minlength="6">
+        </label>
+        <div class="notice" id="authNotice" role="status" aria-live="polite"></div>
+        <div class="actions" style="margin-top:14px">
+          <button type="submit" class="btn primary" id="authSignIn">Sign in</button>
+          <button type="button" class="btn outline" id="authSignUp">Create account</button>
+        </div>
+        <p class="hint" style="margin-top:10px">
+          <button type="button" id="authForgot" style="border:0;background:none;padding:0;color:var(--blue);cursor:pointer;font:inherit">Forgot password?</button>
+        </p>
+        <p class="hint" style="margin-top:14px">Only @BHphoto.com email addresses are allowed.</p>
+      </form>
+
+      <div id="authVerify" hidden>
+        <p>We sent a verification link to <b id="authVerifyEmail"></b>. Click it, then continue below.</p>
+        <div class="notice" id="authVerifyNotice" role="status" aria-live="polite"></div>
+        <div class="actions" style="margin-top:14px">
+          <button type="button" class="btn primary" id="authContinue">I've verified — Continue</button>
+          <button type="button" class="btn outline" id="authResend">Resend email</button>
+          <button type="button" class="btn" id="authSignOut">Sign out</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="shell">
 
   <div class="crumb no-print">Work management <span>›</span> <b>My delivery</b> <span>›</span> <b id="crumbBoard">Monthly board</b></div>
@@ -498,6 +541,7 @@ tr.detail:hover td{background:var(--card)}
     <div class="sep"></div>
     <div class="pushright"></div>
     <button class="btn primary" id="btnExport"><span class="ico">↥</span> Export</button>
+    <span id="cloudAuth" style="display:flex;align-items:center;gap:8px"></span>
   </div>
 
   <!-- setup -->
@@ -579,6 +623,108 @@ tr.detail:hover td{background:var(--card)}
   </div>
 </div>
 
+<!-- ---------------- Firebase (Auth + Firestore) ----------------
+     CDN modular SDK — no npm install / bundler, so this stays a single
+     static file deployable as-is to GitHub Pages and Vercel alike.
+     This config is a public client identifier by Firebase's own design;
+     access control is enforced by Firestore Security Rules (firestore.rules),
+     not by hiding these values. -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendEmailVerification, sendPasswordResetEmail, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+var firebaseConfig = {
+  apiKey: "AIzaSyAGEcddrnzuHNKR9PU6TnthjOtXzP2lw88",
+  authDomain: "monthly-c2d79.firebaseapp.com",
+  projectId: "monthly-c2d79",
+  storageBucket: "monthly-c2d79.firebasestorage.app",
+  messagingSenderId: "869857270779",
+  appId: "1:869857270779:web:3dcead2ef5b8d0cf80895e"
+};
+
+var app = initializeApp(firebaseConfig);
+var auth = getAuth(app);
+var dbFs = getFirestore(app);
+
+function isAllowedEmail(email){
+  return /@bhphoto\.com$/i.test(String(email||"").trim());
+}
+
+function signUp(email, password){
+  if(!isAllowedEmail(email)) return Promise.reject({code:"custom/domain", message:"Only @BHphoto.com email addresses are allowed."});
+  return createUserWithEmailAndPassword(auth, email, password).then(function(cred){
+    return sendEmailVerification(cred.user).then(function(){ return cred.user; });
+  });
+}
+
+function signIn(email, password){
+  if(!isAllowedEmail(email)) return Promise.reject({code:"custom/domain", message:"Only @BHphoto.com email addresses are allowed."});
+  return signInWithEmailAndPassword(auth, email, password).then(function(cred){ return cred.user; });
+}
+
+function resendVerification(){
+  return auth.currentUser ? sendEmailVerification(auth.currentUser) : Promise.reject({message:"Not signed in."});
+}
+
+function resetPassword(email){
+  return sendPasswordResetEmail(auth, email);
+}
+
+function reloadUser(){
+  var user = auth.currentUser;
+  if(!user) return Promise.resolve(null);
+  return user.reload().then(function(){ return auth.currentUser; });
+}
+
+function signOutUser(){ return signOut(auth); }
+
+function onAuthChange(cb){
+  onAuthStateChanged(auth, function(user){
+    if(user && !isAllowedEmail(user.email)){
+      // Defense in depth — signUp/signIn already gate on domain before ever
+      // calling Firebase, so this only fires for a pre-existing account that
+      // predates the restriction (or direct API use bypassing the form).
+      signOut(auth);
+      cb(null, "Only @BHphoto.com email addresses are allowed.");
+      return;
+    }
+    cb(user);
+  });
+}
+
+function syncUp(){
+  var user = auth.currentUser;
+  if(!user) return Promise.resolve();
+  var archive, year;
+  try{ archive = JSON.parse(window.localStorage.getItem("board:index") || "[]"); }catch(e){ archive = []; }
+  try{ year = JSON.parse(window.localStorage.getItem("board:yearend") || "[]"); }catch(e){ year = []; }
+  return setDoc(doc(dbFs, "users", user.uid), { archive: archive, year: year, updatedAt: serverTimestamp() })
+    .catch(function(err){ console.error("Cloud sync failed:", err); });
+}
+
+function syncDown(){
+  var user = auth.currentUser;
+  if(!user) return Promise.resolve(null);
+  return getDoc(doc(dbFs, "users", user.uid)).then(function(snap){
+    return snap.exists() ? snap.data() : null;
+  });
+}
+
+window.MonthlyCloud = {
+  isAllowedEmail: isAllowedEmail,
+  signUp: signUp, signIn: signIn, signOut: signOutUser,
+  resendVerification: resendVerification, resetPassword: resetPassword, reloadUser: reloadUser,
+  onAuthChange: onAuthChange, syncUp: syncUp, syncDown: syncDown
+};
+window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
+</script>
+
 <script>
 (function(){
   "use strict";
@@ -598,6 +744,9 @@ tr.detail:hover td{background:var(--card)}
   var AVCOL = ["#0073EA","#00C875","#A25DDC","#FDAB3D","#E2445C","#579BFC","#6161FF","#00A9A5","#FF158A","#7E3B8A"];
 
   var state = {rows:[], period:"", owner:"", jiraBase:"", note:"", groupBy:"fix", mineOnly:false, pmFilter:"", closed:{}, open:{}, view:"board"};
+  // Set while a Firestore pull is being applied locally, so saveYear/store.set
+  // (below) don't turn right around and sync the same data straight back up.
+  var cloudSuppressed = false;
 
   var $ = function(id){return document.getElementById(id);};
   var esc = function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
@@ -623,7 +772,10 @@ tr.detail:hover td{background:var(--card)}
   function loadYear(){
     try{ var v=window.localStorage.getItem(YEAR_KEY); return v?JSON.parse(v):[]; }catch(e){ return []; }
   }
-  function saveYear(list){ try{ window.localStorage.setItem(YEAR_KEY, JSON.stringify(list)); }catch(e){} }
+  function saveYear(list){
+    try{ window.localStorage.setItem(YEAR_KEY, JSON.stringify(list)); }catch(e){}
+    if(!cloudSuppressed && window.MonthlyCloud) window.MonthlyCloud.syncUp();
+  }
   function isStarred(r, set){ return set ? !!set[yearId(r)] : loadYear().some(function(e){return e.id===yearId(r);}); }
   function toggleStar(rowId){
     var r=null; for(var k=0;k<state.rows.length;k++){ if(state.rows[k]._id===rowId){ r=state.rows[k]; break; } }
@@ -1885,6 +2037,7 @@ tr.detail:hover td{background:var(--card)}
     },
     set: function(key, value){
       try{ window.localStorage.setItem(key, value); }catch(e){ return Promise.reject(e); }
+      if(key===IDX && !cloudSuppressed && window.MonthlyCloud) window.MonthlyCloud.syncUp();
       return Promise.resolve();
     }
   };
@@ -1993,6 +2146,93 @@ tr.detail:hover td{background:var(--card)}
       .catch(function(){ note("Couldn't reach shared storage. If this is the GitHub Pages copy, shared storage only works on the Vercel deployment."); })
       .then(done);
   });
+
+  /* ---------------- account (Firebase sign-in gate) ---------------- */
+  function friendlyAuthError(err){
+    var code = err && err.code;
+    if(code==="custom/domain") return err.message;
+    if(code==="auth/invalid-email") return "That doesn't look like a valid email address.";
+    if(code==="auth/missing-password" || code==="auth/weak-password") return "Password must be at least 6 characters.";
+    if(code==="auth/email-already-in-use") return "An account already exists for that email — sign in instead.";
+    if(code==="auth/invalid-credential" || code==="auth/wrong-password" || code==="auth/user-not-found") return "Email or password is incorrect.";
+    if(code==="auth/too-many-requests") return "Too many attempts — wait a bit and try again.";
+    return (err && err.message) || "Something went wrong. Try again.";
+  }
+
+  function applyCloudDoc(archive, year){
+    cloudSuppressed = true;
+    store.set(IDX, JSON.stringify(archive||[])).then(function(){
+      saveYear(year||[]);
+      drawIdx(); updateYearTab((year||[]).length);
+      note("Loaded your saved months and starred items from your account.");
+    }).then(function(){ cloudSuppressed = false; });
+  }
+
+  function renderAccountChip(user){
+    var el = $("cloudAuth");
+    if(!el) return;
+    el.innerHTML = avatar(user.email, "Signed in") +
+      '<span class="hint">'+esc(user.email)+'</span>' +
+      '<button type="button" class="btn" id="authSignOutToolbar">Sign out</button>';
+    var out = $("authSignOutToolbar");
+    if(out) out.addEventListener("click", function(){ window.MonthlyCloud.signOut(); });
+  }
+
+  function showAuthView(view){
+    $("authLoading").hidden = view!=="loading";
+    $("authLoginForm").hidden = view!=="login";
+    $("authVerify").hidden = view!=="verify";
+    $("authGate").hidden = view==="app";
+  }
+
+  function handleCloudAuth(user, errMsg){
+    if(errMsg){ showAuthView("login"); $("authNotice").textContent = errMsg; return; }
+    if(!user){ showAuthView("login"); return; }
+    if(!user.emailVerified){
+      $("authVerifyEmail").textContent = user.email;
+      showAuthView("verify");
+      return;
+    }
+    showAuthView("app");
+    renderAccountChip(user);
+    window.MonthlyCloud.syncDown().then(function(cloudDoc){
+      if(!cloudDoc) return;
+      if(!window.confirm("Load your saved months and starred items from your account? This replaces the saved months and starred items currently in this browser.")) return;
+      applyCloudDoc(cloudDoc.archive, cloudDoc.year);
+    });
+  }
+
+  $("authLoginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    $("authNotice").textContent = "";
+    window.MonthlyCloud.signIn($("authEmail").value, $("authPassword").value)
+      .catch(function(err){ $("authNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authSignUp").addEventListener("click", function(){
+    $("authNotice").textContent = "";
+    window.MonthlyCloud.signUp($("authEmail").value, $("authPassword").value)
+      .catch(function(err){ $("authNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authForgot").addEventListener("click", function(){
+    var email = $("authEmail").value;
+    if(!email){ $("authNotice").textContent = "Enter your email above first."; return; }
+    window.MonthlyCloud.resetPassword(email)
+      .then(function(){ $("authNotice").textContent = "Password reset email sent."; })
+      .catch(function(err){ $("authNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authContinue").addEventListener("click", function(){
+    $("authVerifyNotice").textContent = "";
+    window.MonthlyCloud.reloadUser().then(function(user){
+      if(user && user.emailVerified) handleCloudAuth(user);
+      else $("authVerifyNotice").textContent = "Still not verified — check your email and try again.";
+    });
+  });
+  $("authResend").addEventListener("click", function(){
+    window.MonthlyCloud.resendVerification()
+      .then(function(){ $("authVerifyNotice").textContent = "Verification email sent again."; })
+      .catch(function(err){ $("authVerifyNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authSignOut").addEventListener("click", function(){ window.MonthlyCloud.signOut(); });
 
   /* ---------------- wiring ---------------- */
   function monthLabel(d){ return d.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
@@ -2114,6 +2354,13 @@ tr.detail:hover td{background:var(--card)}
   setView("board");
   drawIdx();
   updateYearTab(loadYear().length);
+
+  function initCloud(){
+    showAuthView("loading");
+    window.MonthlyCloud.onAuthChange(handleCloudAuth);
+  }
+  if(window.MonthlyCloud) initCloud();
+  else window.addEventListener("monthlycloud:ready", initCloud, {once:true});
 })();
 </script>
 </body>
