@@ -2077,16 +2077,22 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
       }
     });
   });
-  $("btnSave").addEventListener("click",function(){
-    if(!store){note("Saving isn't available here — export the CSV instead.");return;}
-    if(!state.rows.length){note("Add items before saving.");return;}
-    readIdx().then(function(list){
+  // Shared by the manual "Save this month" button and the session-timeout
+  // auto-save below, so the two stay in sync.
+  function saveCurrentMonth(){
+    if(!store || !state.rows.length) return Promise.resolve(false);
+    return readIdx().then(function(list){
       var e={period:state.period||new Date().toLocaleDateString(undefined,{month:"long",year:"numeric"}),note:state.note,rows:state.rows,saved:Date.now()};
       var ix=-1;
       list.forEach(function(m,k){if(same(m.period,e.period))ix=k;});
       if(ix>-1)list[ix]=e;else list.unshift(e);
-      return store.set(IDX,JSON.stringify(list.slice(0,24)));
-    }).then(function(){drawIdx();note("Saved.");}).catch(function(){note("That didn't save — export the CSV as a backup.");});
+      return store.set(IDX,JSON.stringify(list.slice(0,24))).then(function(){ return true; });
+    });
+  }
+  $("btnSave").addEventListener("click",function(){
+    if(!store){note("Saving isn't available here — export the CSV instead.");return;}
+    if(!state.rows.length){note("Add items before saving.");return;}
+    saveCurrentMonth().then(function(){drawIdx();note("Saved.");}).catch(function(){note("That didn't save — export the CSV as a backup.");});
   });
 
   /* ---------------- shared team storage ---------------- */
@@ -2175,7 +2181,7 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
       '<span class="hint">'+esc(user.email)+'</span>' +
       '<button type="button" class="btn" id="authSignOutToolbar">Sign out</button>';
     var out = $("authSignOutToolbar");
-    if(out) out.addEventListener("click", function(){ window.MonthlyCloud.signOut(); });
+    if(out) out.addEventListener("click", function(){ manualSignOut(); });
   }
 
   function showAuthView(view){
@@ -2185,16 +2191,65 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
     $("authGate").hidden = view==="app";
   }
 
+  /* ---- 4-hour absolute session timeout ----
+     Firebase itself keeps the sign-in around indefinitely (browserLocalPersistence,
+     its default) so reloading the page never re-prompts for a login on its own.
+     This is a separate, app-level timer: it starts once at actual sign-in and
+     forces a sign-out (auto-saving first) 4 hours later, regardless of activity,
+     surviving page reloads since it's anchored to a stored timestamp rather than
+     a JS timer. */
+  var SESSION_KEY = "board:sessionStart";
+  var SESSION_MS = 4*60*60*1000;
+  var sessionTimer = null;
+
+  function ensureSessionStart(){
+    var v = null;
+    try{ v = window.localStorage.getItem(SESSION_KEY); }catch(e){}
+    if(!v){
+      v = String(Date.now());
+      try{ window.localStorage.setItem(SESSION_KEY, v); }catch(e){}
+    }
+    return Number(v);
+  }
+  function clearSessionStart(){ try{ window.localStorage.removeItem(SESSION_KEY); }catch(e){} }
+  function stopSessionTimer(){ if(sessionTimer){ clearInterval(sessionTimer); sessionTimer=null; } }
+  function startSessionTimer(){
+    var start = ensureSessionStart();
+    if(Date.now()-start >= SESSION_MS){ autoSaveAndSignOut(); return; }
+    stopSessionTimer();
+    sessionTimer = setInterval(function(){
+      if(Date.now()-start >= SESSION_MS) autoSaveAndSignOut();
+    }, 60000);
+  }
+  function manualSignOut(){
+    stopSessionTimer(); clearSessionStart();
+    window.MonthlyCloud.signOut();
+  }
+  function autoSaveAndSignOut(){
+    stopSessionTimer();
+    saveCurrentMonth().catch(function(){}).then(function(){
+      return window.MonthlyCloud.syncUp();
+    }).catch(function(){}).then(function(){
+      clearSessionStart();
+      return window.MonthlyCloud.signOut();
+    }).then(function(){
+      drawIdx();
+      $("authNotice").textContent = "You were signed out after 4 hours — your board was auto-saved to Saved months.";
+    });
+  }
+
   function handleCloudAuth(user, errMsg){
-    if(errMsg){ showAuthView("login"); $("authNotice").textContent = errMsg; return; }
-    if(!user){ showAuthView("login"); return; }
+    if(errMsg){ stopSessionTimer(); showAuthView("login"); $("authNotice").textContent = errMsg; return; }
+    if(!user){ stopSessionTimer(); showAuthView("login"); return; }
     if(!user.emailVerified){
+      stopSessionTimer();
       $("authVerifyEmail").textContent = user.email;
       showAuthView("verify");
       return;
     }
     showAuthView("app");
     renderAccountChip(user);
+    startSessionTimer();
     window.MonthlyCloud.syncDown().then(function(cloudDoc){
       if(!cloudDoc) return;
       if(!window.confirm("Load your saved months and starred items from your account? This replaces the saved months and starred items currently in this browser.")) return;
@@ -2232,7 +2287,7 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
       .then(function(){ $("authVerifyNotice").textContent = "Verification email sent again."; })
       .catch(function(err){ $("authVerifyNotice").textContent = friendlyAuthError(err); });
   });
-  $("authSignOut").addEventListener("click", function(){ window.MonthlyCloud.signOut(); });
+  $("authSignOut").addEventListener("click", function(){ manualSignOut(); });
 
   /* ---------------- wiring ---------------- */
   function monthLabel(d){ return d.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
