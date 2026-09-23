@@ -15,6 +15,22 @@ Everything runs client-side in one HTML file — no build step, no backend requi
 
 Also has a star-to-save-for-later feature (**Year in review**, for pulling together an end-of-year report) and optional shared team storage — see below.
 
+### Saved months: CSV backup, restore, and loading everything at once
+
+The **Saved months** card has:
+
+- **Export CSV** — downloads every saved month (all rows, plus the period, month note, and save timestamp) as one CSV file, a copy that lives outside the browser entirely.
+- **Import CSV** — restores saved months from a CSV exported this way. Months in the file are merged into what's already saved (matched by period), so it's safe to import even if some months are already there. This is the backup path if the browser's storage ever gets cleared and cloud sync isn't available.
+- **Load all to board** — puts every saved month onto the board at once, grouped by month (see **Group by month** below), so you can see everything side by side instead of one month at a time.
+
+### Grouping the board by month
+
+The board's grouping options (release, sprint, portfolio, priority, reporter) now include **Group by month**, which groups rows by which saved month they came from and orders the groups newest-first. It's used automatically by **Load all to board**, and can also be picked directly from the grouping dropdown.
+
+### Year in review stays in sync
+
+Starring an item for **Year in review** before its writeup (what we were solving / what shipped / impact to watch) is filled in no longer freezes that entry blank — editing the row afterward keeps the year-in-review entry updated with the latest text.
+
 ### Sharing a board with your team
 
 The **Saved months** card has a **Share with your team** section: agree on a code with your teammates (e.g. drop one in Slack), then:
