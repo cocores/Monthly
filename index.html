@@ -1442,6 +1442,14 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
     host.innerHTML = html;
   }
 
+  // Lets a writeup be added or edited right from Year in review, not just from
+  // the main board — same contenteditable pattern as storyRow's boxes, keyed
+  // by the starred entry's id instead of a board row index.
+  function yearBox(e,cls,f,ph){
+    return '<div class="sbox '+cls+'"><div class="slabel">'+esc(LABELS[f])+'</div>'+
+      '<div class="sedit" contenteditable="plaintext-only" data-yid="'+esc(e.id)+'" data-yf="'+f+'" data-ph="'+esc(ph)+'">'+esc(e[f])+'</div></div>';
+  }
+
   function renderYear(){
     var host=$("yearview"), list=loadYear();
     updateYearTab(list.length);
@@ -1478,11 +1486,11 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
             (e.fix?'<span class="pill rel">'+esc(e.fix)+'</span>':"")+
             '<button class="bubble no-print" data-unstar="'+esc(e.id)+'" title="Remove from the year-end report">'+starSvg(true)+'</button>'+
           '</div></div>'+
-          (norm(e.problem)||norm(e.done)||norm(e.impact) ? '<div class="fbody">'+
-            (norm(e.problem)?'<div class="sbox why"><div class="slabel">'+esc(LABELS.problem)+'</div><div class="sedit">'+esc(e.problem)+'</div></div>':"")+
-            (norm(e.done)?'<div class="sbox did"><div class="slabel">'+esc(LABELS.done)+'</div><div class="sedit">'+esc(e.done)+'</div></div>':"")+
-            (norm(e.impact)?'<div class="sbox imp"><div class="slabel">'+esc(LABELS.impact)+'</div><div class="sedit">'+esc(e.impact)+'</div></div>':"")+
-          '</div>' : '')+
+          '<div class="fbody">'+
+            yearBox(e,"why","problem","The problem, the complaint, the number that was off. Why this was worth a sprint.")+
+            yearBox(e,"did","done","What we actually built and where it lives now.")+
+            yearBox(e,"imp","impact","The metric or behavior to check next month.")+
+          '</div>'+
         '</div>';
       });
     });
@@ -1566,6 +1574,20 @@ window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
           var tr2=document.querySelector('tr[data-row="'+r._id+'"]');
           if(tr2) tr2.classList.toggle("blank", !hasStory(r));
         }
+      }
+      return;
+    }
+    if(el.dataset && el.dataset.yid!==undefined && el.dataset.yf!==undefined){
+      var list=loadYear(), idx=-1;
+      list.forEach(function(en,k){ if(en.id===el.dataset.yid) idx=k; });
+      if(idx>-1){
+        var text = el.textContent.replace(/\u00a0/g," ");
+        list[idx][el.dataset.yf] = text;
+        saveYear(list);
+        // Keep the board row in sync too, if this item is on the current board.
+        var br=null;
+        for(var k2=0;k2<state.rows.length;k2++){ if(yearId(state.rows[k2])===el.dataset.yid){ br=state.rows[k2]; break; } }
+        if(br){ br[el.dataset.yf]=text; scheduleBoardSync(); }
       }
     }
   });
