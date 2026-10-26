@@ -173,7 +173,7 @@ select.pick:focus{outline:2px solid var(--blue);outline-offset:-1px}
 
 /* ---------- cards ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-.card-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.card-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
 .card-head h2{font-size:16px;font-weight:700}
 .card-head .hint{font-size:12.5px;color:var(--faint);margin-left:auto}
 .card-body{padding:18px}
@@ -185,14 +185,14 @@ select.pick:focus{outline:2px solid var(--blue);outline-offset:-1px}
 .fgrid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
 label.f{display:block}
 label.f > span{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:5px}
-input[type=text],textarea,select.f-select{
+input[type=text],input[type=email],input[type=password],textarea,select.f-select{
   width:100%;font:400 14px "Figtree",sans-serif;color:var(--text);background:var(--card);
   border:1px solid var(--line-2);border-radius:7px;padding:8px 11px;
   transition:border-color var(--ease),box-shadow var(--ease);
 }
 select.f-select{height:36px;cursor:pointer}
-input[type=text]:hover,textarea:hover,select.f-select:hover{border-color:var(--faint)}
-input[type=text]:focus,textarea:focus,select.f-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,115,234,.14)}
+input[type=text]:hover,input[type=email]:hover,input[type=password]:hover,textarea:hover,select.f-select:hover{border-color:var(--faint)}
+input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,textarea:focus,select.f-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,115,234,.14)}
 textarea{resize:vertical;line-height:1.5}
 #paste{min-height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
@@ -297,6 +297,15 @@ tr:hover .del{opacity:1}
 }
 .additem:hover{color:var(--blue);background:var(--hover)}
 
+/* ---------- star (year-end report) ---------- */
+td.star{width:38px;padding:0;text-align:center}
+.starbtn{
+  border:0;background:transparent;cursor:pointer;padding:4px;border-radius:6px;line-height:0;
+  transition:background var(--ease),transform var(--ease);
+}
+.starbtn:hover{background:#FFF6DA;transform:scale(1.08)}
+.starbtn svg{display:block}
+
 /* ---------- per-item story ---------- */
 td.bub{width:42px;padding:0;text-align:center}
 .bubble{
@@ -352,6 +361,11 @@ tr.detail:hover td{background:var(--card)}
 .chip .n{color:var(--faint);font-size:12px}
 .chip button{border:0;background:transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--blue);padding:2px 6px;border-radius:4px}
 .chip button:hover{background:#DCEBFB}
+.teamshare{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.teamshare .tsl{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.teamshare .tsp{font-size:12.5px;color:var(--faint);margin:0 0 12px;max-width:70ch}
+.tsrow{display:flex;flex-wrap:wrap;gap:8px}
+.tsrow input{flex:1 1 260px}
 .foot{margin-top:34px;font-size:12px;color:var(--faint)}
 
 /* ---------- toast ---------- */
@@ -398,21 +412,24 @@ tr.detail:hover td{background:var(--card)}
   .btn.primary{padding:0 14px}
   select.pick{height:38px}
   .fgrid{grid-template-columns:1fr}
-  input[type=text],textarea,.noteedit,.sedit,select.pick,select.f-select{font-size:16px} /* stop iOS auto-zoom on focus */
+  input[type=text],input[type=email],input[type=password],textarea,.noteedit,.sedit,select.pick,select.f-select{font-size:16px} /* stop iOS auto-zoom on focus */
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab{white-space:nowrap;flex:0 0 auto}
 
   .scroller{overflow-x:visible}
   table.bd{min-width:0;width:100%;border-spacing:0}
   table.bd thead{display:none}
   table.bd,table.bd tbody,table.bd tr,table.bd td{display:block;width:100%}
-  table.bd tr{position:relative;padding:10px 66px 12px 14px;border-bottom:1px solid var(--line)}
+  table.bd tr{position:relative;padding:10px 92px 12px 14px;border-bottom:1px solid var(--line)}
   table.bd tr.detail{display:none;padding:0}
   table.bd tr.detail.on{display:block}
   table.bd tr:last-child{border-bottom:0}
   table.bd td{border-bottom:0;height:auto;padding:5px 0}
   table.bd td.bar{position:absolute;left:0;top:0;bottom:0;width:4px;height:auto}
   table.bd td.name{padding:0 0 6px;font-weight:600}
-  table.bd td.bub{position:absolute;top:8px;right:36px;width:auto;padding:0}
-  table.bd tr:not(.detail) td:last-child{position:absolute;top:6px;right:8px;width:auto;padding:0}
+  table.bd td.star{position:absolute;top:8px;right:62px;width:auto;padding:0}
+  table.bd td.bub{position:absolute;top:8px;right:34px;width:auto;padding:0}
+  table.bd tr:not(.detail) td:last-child{position:absolute;top:6px;right:6px;width:auto;padding:0}
   table.bd .del{opacity:1}
   table.bd td[data-label]{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:30px}
   table.bd td[data-label]::before{content:attr(data-label);font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;flex:0 0 auto}
@@ -446,6 +463,49 @@ tr.detail:hover td{background:var(--card)}
 </style>
 </head>
 <body>
+
+<!-- ---------------- sign-in gate ----------------
+     Visible by default (fails closed) until Firebase resolves the auth
+     state; hidden only once signed in with a verified @BHphoto.com account. -->
+<div class="ovl no-print" id="authGate" role="dialog" aria-label="Sign in">
+  <div class="modal" style="width:min(380px,100%)">
+    <div class="mhead"><h2>Monthly Delivery Board</h2></div>
+    <div class="card-body">
+
+      <div id="authLoading"><p class="hint">Loading…</p></div>
+
+      <form id="authLoginForm" hidden>
+        <label class="f"><span>Work email</span>
+          <input type="email" id="authEmail" placeholder="you@bhphoto.com" autocomplete="email" required>
+        </label>
+        <label class="f" style="margin-top:12px"><span>Password</span>
+          <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" required minlength="6">
+        </label>
+        <div class="notice" id="authNotice" role="status" aria-live="polite"></div>
+        <div class="actions" style="margin-top:14px">
+          <button type="submit" class="btn primary" id="authSignIn">Sign in</button>
+          <button type="button" class="btn outline" id="authSignUp">Create account</button>
+        </div>
+        <p class="hint" style="margin-top:10px">
+          <button type="button" id="authForgot" style="border:0;background:none;padding:0;color:var(--blue);cursor:pointer;font:inherit">Forgot password?</button>
+        </p>
+        <p class="hint" style="margin-top:14px">Only @BHphoto.com email addresses are allowed.</p>
+      </form>
+
+      <div id="authVerify" hidden>
+        <p>We sent a verification link to <b id="authVerifyEmail"></b>. Click it, then continue below.</p>
+        <div class="notice" id="authVerifyNotice" role="status" aria-live="polite"></div>
+        <div class="actions" style="margin-top:14px">
+          <button type="button" class="btn primary" id="authContinue">I've verified — Continue</button>
+          <button type="button" class="btn outline" id="authResend">Resend email</button>
+          <button type="button" class="btn" id="authSignOut">Sign out</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="shell">
 
   <div class="crumb no-print">Work management <span>›</span> <b>My delivery</b> <span>›</span> <b id="crumbBoard">Monthly board</b></div>
@@ -457,6 +517,7 @@ tr.detail:hover td{background:var(--card)}
     <button class="tab on" data-view="board">Main board</button>
     <button class="tab" data-view="dash">Dashboard</button>
     <button class="tab" data-view="updates">Updates</button>
+    <button class="tab" data-view="year">Year in review</button>
   </div>
 
   <div class="toolbar no-print">
@@ -468,7 +529,12 @@ tr.detail:hover td{background:var(--card)}
       <option value="portfolio">Group by portfolio</option>
       <option value="priority">Group by priority</option>
       <option value="reporter">Group by reporter</option>
+      <option value="pm">Group by product manager</option>
+      <option value="month">Group by month</option>
       <option value="none">No grouping</option>
+    </select>
+    <select class="pick" id="filterPm" title="Filter by product manager">
+      <option value="">All product managers</option>
     </select>
     <button class="btn" id="btnMine"><span class="ico">◍</span> Person: me only</button>
     <button class="btn" id="btnStories"><span class="ico">▤</span> Open all writeups</button>
@@ -476,6 +542,7 @@ tr.detail:hover td{background:var(--card)}
     <div class="sep"></div>
     <div class="pushright"></div>
     <button class="btn primary" id="btnExport"><span class="ico">↥</span> Export</button>
+    <span id="cloudAuth" style="display:flex;align-items:center;gap:8px"></span>
   </div>
 
   <!-- setup -->
@@ -515,13 +582,35 @@ tr.detail:hover td{background:var(--card)}
   <div id="updates"></div>
   <div id="charts"></div>
   <div id="feed"></div>
+  <div id="yearview"></div>
 
   <div class="card no-print" id="archive" hidden style="margin-top:22px">
-    <div class="card-head"><h2>Saved months</h2><button class="btn outline" id="btnSave" style="margin-left:auto">Save this month</button></div>
-    <div class="card-body"><div class="chips" id="archiveList"></div></div>
+    <div class="card-head">
+      <h2>Saved months</h2>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn outline" id="btnLoadAllArchive" title="Load every saved month onto the board at once, grouped by month">Load all to board</button>
+        <button class="btn outline" id="btnExportArchive" title="Download all saved months as a CSV backup">Export CSV</button>
+        <button class="btn outline" id="btnImportArchive" title="Restore saved months from a CSV backup — useful if the browser cache gets cleared">Import CSV</button>
+        <button class="btn outline" id="btnSave">Save this month</button>
+      </div>
+      <input type="file" id="archiveCsvFile" accept=".csv,text/csv" style="display:none">
+    </div>
+    <div class="card-body">
+      <p class="hint" style="margin-bottom:10px">Saved months live in this browser (and, when signed in, your account). <b>Export CSV</b> keeps a copy outside the browser as a backup; <b>Import CSV</b> restores from one — handy if the browser's storage ever gets cleared.</p>
+      <div class="chips" id="archiveList"></div>
+      <div class="teamshare">
+        <div class="tsl">Share with your team</div>
+        <p class="tsp">Agree on a code with your teammates (e.g. in Slack). <b>Push</b> sends this board, your saved months and your starred items to that shared code. <b>Pull</b> replaces everything in this browser with whatever was last pushed. This isn't private — anyone with the code can read and overwrite it.</p>
+        <div class="tsrow">
+          <input type="text" id="teamCode" placeholder="Shared board code, e.g. acme-web-team">
+          <button class="btn outline" id="btnTeamPush">Push to team</button>
+          <button class="btn outline" id="btnTeamPull">Pull from team</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="foot">Everything stays in this page unless you save or export it.</div>
+  <div class="foot">Everything stays in this page unless you save, export, or push it to shared storage.</div>
 </div>
 
 <div class="toast no-print" id="toast" role="status" aria-live="polite" hidden></div>
@@ -546,6 +635,109 @@ tr.detail:hover td{background:var(--card)}
   </div>
 </div>
 
+<!-- ---------------- Firebase (Auth + Firestore) ----------------
+     CDN modular SDK — no npm install / bundler, so this stays a single
+     static file deployable as-is to GitHub Pages and Vercel alike.
+     This config is a public client identifier by Firebase's own design;
+     access control is enforced by Firestore Security Rules (firestore.rules),
+     not by hiding these values. -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendEmailVerification, sendPasswordResetEmail, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+var firebaseConfig = {
+  apiKey: "AIzaSyAGEcddrnzuHNKR9PU6TnthjOtXzP2lw88",
+  authDomain: "monthly-c2d79.firebaseapp.com",
+  projectId: "monthly-c2d79",
+  storageBucket: "monthly-c2d79.firebasestorage.app",
+  messagingSenderId: "869857270779",
+  appId: "1:869857270779:web:3dcead2ef5b8d0cf80895e"
+};
+
+var app = initializeApp(firebaseConfig);
+var auth = getAuth(app);
+var dbFs = getFirestore(app);
+
+function isAllowedEmail(email){
+  return /@bhphoto\.com$/i.test(String(email||"").trim());
+}
+
+function signUp(email, password){
+  if(!isAllowedEmail(email)) return Promise.reject({code:"custom/domain", message:"Only @BHphoto.com email addresses are allowed."});
+  return createUserWithEmailAndPassword(auth, email, password).then(function(cred){
+    return sendEmailVerification(cred.user).then(function(){ return cred.user; });
+  });
+}
+
+function signIn(email, password){
+  if(!isAllowedEmail(email)) return Promise.reject({code:"custom/domain", message:"Only @BHphoto.com email addresses are allowed."});
+  return signInWithEmailAndPassword(auth, email, password).then(function(cred){ return cred.user; });
+}
+
+function resendVerification(){
+  return auth.currentUser ? sendEmailVerification(auth.currentUser) : Promise.reject({message:"Not signed in."});
+}
+
+function resetPassword(email){
+  return sendPasswordResetEmail(auth, email);
+}
+
+function reloadUser(){
+  var user = auth.currentUser;
+  if(!user) return Promise.resolve(null);
+  return user.reload().then(function(){ return auth.currentUser; });
+}
+
+function signOutUser(){ return signOut(auth); }
+
+function onAuthChange(cb){
+  onAuthStateChanged(auth, function(user){
+    if(user && !isAllowedEmail(user.email)){
+      // Defense in depth — signUp/signIn already gate on domain before ever
+      // calling Firebase, so this only fires for a pre-existing account that
+      // predates the restriction (or direct API use bypassing the form).
+      signOut(auth);
+      cb(null, "Only @BHphoto.com email addresses are allowed.");
+      return;
+    }
+    cb(user);
+  });
+}
+
+function syncUp(){
+  var user = auth.currentUser;
+  if(!user) return Promise.resolve();
+  var archive, year, board;
+  try{ archive = JSON.parse(window.localStorage.getItem("board:index") || "[]"); }catch(e){ archive = []; }
+  try{ year = JSON.parse(window.localStorage.getItem("board:yearend") || "[]"); }catch(e){ year = []; }
+  try{ board = JSON.parse(window.localStorage.getItem("board:current") || "null"); }catch(e){ board = null; }
+  return setDoc(doc(dbFs, "users", user.uid), { archive: archive, year: year, board: board, updatedAt: serverTimestamp() })
+    .catch(function(err){ console.error("Cloud sync failed:", err); });
+}
+
+function syncDown(){
+  var user = auth.currentUser;
+  if(!user) return Promise.resolve(null);
+  return getDoc(doc(dbFs, "users", user.uid)).then(function(snap){
+    return snap.exists() ? snap.data() : null;
+  });
+}
+
+window.MonthlyCloud = {
+  isAllowedEmail: isAllowedEmail,
+  signUp: signUp, signIn: signIn, signOut: signOutUser,
+  resendVerification: resendVerification, resetPassword: resetPassword, reloadUser: reloadUser,
+  onAuthChange: onAuthChange, syncUp: syncUp, syncDown: syncDown
+};
+window.dispatchEvent(new CustomEvent("monthlycloud:ready"));
+</script>
+
 <script>
 (function(){
   "use strict";
@@ -559,11 +751,55 @@ tr.detail:hover td{background:var(--card)}
   var CREW = [["wo","WO"],["qa","QA"],["ux","UX"],["pm","PM"]];
   var PLABEL = {reporter:"Reporter",wo:"WO",qa:"QA",ux:"UX",pm:"PM"};
   var EICON = '<div class="eicon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5h6a1 1 0 011 1V6H8V4.5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 12.5l2 2 4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+  var EICON_STAR = '<div class="eicon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.35 1.05 6.15L12 16.9l-5.45 3.1 1.05-6.15L3.2 9.5l6.1-.9L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>';
   var PRI = {P1:{c:"var(--red)"},P2:{c:"var(--orange)"},P3:{c:"var(--lblue)"},P4:{c:"var(--teal)"}};
   var GCOL = ["var(--blue)","var(--green)","var(--purple)","var(--orange)","var(--pink)","var(--lblue)","var(--indigo)","var(--teal)"];
   var AVCOL = ["#0073EA","#00C875","#A25DDC","#FDAB3D","#E2445C","#579BFC","#6161FF","#00A9A5","#FF158A","#7E3B8A"];
 
-  var state = {rows:[], period:"", owner:"", jiraBase:"", note:"", groupBy:"fix", mineOnly:false, closed:{}, open:{}, view:"board"};
+  var state = {rows:[], period:"", owner:"", jiraBase:"", note:"", groupBy:"fix", mineOnly:false, pmFilter:"", closed:{}, open:{}, view:"board"};
+  // Set while a Firestore pull is being applied locally, so saveYear/store.set
+  // (below) don't turn right around and sync the same data straight back up.
+  var cloudSuppressed = false;
+
+  /* ---- current (unsaved) board: local persistence + debounced cloud sync ----
+     Main board / Dashboard / Updates are all just views over `state`, so
+     persisting this one snapshot keeps all three populated across a reload
+     or a different device, same as Saved months / Year in review already do. */
+  var CURRENT_KEY = "board:current";
+  var boardSyncTimer = null;
+  function currentBoardSnapshot(){
+    return {rows:state.rows, period:state.period, owner:state.owner, jiraBase:state.jiraBase, note:state.note,
+      groupBy:state.groupBy, mineOnly:state.mineOnly, pmFilter:state.pmFilter};
+  }
+  function persistCurrentBoard(){
+    if(cloudSuppressed) return;
+    try{ window.localStorage.setItem(CURRENT_KEY, JSON.stringify(currentBoardSnapshot())); }catch(e){}
+    if(window.MonthlyCloud) window.MonthlyCloud.syncUp();
+  }
+  function scheduleBoardSync(){
+    if(boardSyncTimer) clearTimeout(boardSyncTimer);
+    boardSyncTimer = setTimeout(persistCurrentBoard, 1500);
+  }
+  function applyBoardSnapshot(snap){
+    state.rows = (snap.rows||[]).map(function(o){
+      var r=blank(); ALL_FIELDS.forEach(function(f){if(o[f]!==undefined)r[f]=o[f];}); return r;
+    });
+    state.period=snap.period||""; state.owner=snap.owner||""; state.jiraBase=snap.jiraBase||""; state.note=snap.note||"";
+    state.groupBy=snap.groupBy||"fix"; state.mineOnly=!!snap.mineOnly; state.pmFilter=snap.pmFilter||"";
+    ensurePeriodValue(state.period);
+    $("owner").value=state.owner; $("jiraBase").value=state.jiraBase; $("note").value=state.note; $("groupBy").value=state.groupBy;
+    $("btnMine").classList.toggle("on", state.mineOnly);
+    $("btnMine").innerHTML='<span class="ico">◍</span> '+(state.mineOnly?"Person: me only":"Person: everyone");
+  }
+  function restoreCurrentBoardFromLocal(){
+    var raw = null;
+    try{ raw = window.localStorage.getItem(CURRENT_KEY); }catch(e){}
+    if(!raw) return false;
+    var snap; try{ snap = JSON.parse(raw); }catch(e){ return false; }
+    if(!snap || !snap.rows || !snap.rows.length) return false;
+    applyBoardSnapshot(snap);
+    return true;
+  }
 
   var $ = function(id){return document.getElementById(id);};
   var esc = function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
@@ -580,6 +816,61 @@ tr.detail:hover td{background:var(--card)}
     return '<span class="av" title="'+esc((title?title+": ":"")+n)+'" style="background:'+AVCOL[hash(norm(n).toLowerCase())%AVCOL.length]+'">'+esc(initials(n))+'</span>';
   }
   function priKey(p){var m=/([1-4])/.exec(p||"");return m?"P"+m[1]:null;}
+
+  /* ---------------- year-end report (starred items) ---------------- */
+  var YEAR_KEY="board:yearend";
+  function yearId(r){
+    return norm(r.key) ? "k:"+norm(r.key).toLowerCase() : "p:"+norm(state.period).toLowerCase()+"|"+norm(r.summary).toLowerCase();
+  }
+  function loadYear(){
+    try{ var v=window.localStorage.getItem(YEAR_KEY); return v?JSON.parse(v):[]; }catch(e){ return []; }
+  }
+  function saveYear(list){
+    try{ window.localStorage.setItem(YEAR_KEY, JSON.stringify(list)); }catch(e){}
+    if(!cloudSuppressed && window.MonthlyCloud) window.MonthlyCloud.syncUp();
+  }
+  function isStarred(r, set){ return set ? !!set[yearId(r)] : loadYear().some(function(e){return e.id===yearId(r);}); }
+  function toggleStar(rowId){
+    var r=null; for(var k=0;k<state.rows.length;k++){ if(state.rows[k]._id===rowId){ r=state.rows[k]; break; } }
+    if(!r) return;
+    var list=loadYear(), id=yearId(r), idx=-1;
+    list.forEach(function(e,k){ if(e.id===id) idx=k; });
+    if(idx>-1) list.splice(idx,1);
+    else list.unshift({id:id,key:r.key,summary:r.summary,priority:r.priority,period:state.period,
+      portfolio:r.portfolio,reporter:r.reporter,fix:r.fix,sprint:r.sprint,
+      problem:r.problem,done:r.done,impact:r.impact});
+    saveYear(list);
+    updateYearTab(list.length);
+  }
+  // Keeps a starred item's Year in review entry in sync with the live row —
+  // otherwise starring something before its writeup is filled in freezes
+  // that entry blank forever, since the star only snapshotted the row once.
+  // `oldId` is the row's yearId() from *before* whatever edit triggered this,
+  // so the lookup still finds the entry even if the edit changed the key or
+  // (for keyless rows) the summary that yearId() is derived from.
+  function refreshYearEntry(r, oldId){
+    var list=loadYear(), idx=-1;
+    list.forEach(function(e,k){ if(e.id===oldId) idx=k; });
+    if(idx===-1) return;
+    list[idx]={id:yearId(r),key:r.key,summary:r.summary,priority:r.priority,period:state.period,
+      portfolio:r.portfolio,reporter:r.reporter,fix:r.fix,sprint:r.sprint,
+      problem:r.problem,done:r.done,impact:r.impact};
+    saveYear(list);
+  }
+  function starSvg(on){
+    return '<svg width="18" height="18" viewBox="0 0 20 20" fill="'+(on?"var(--yellow)":"none")+'">'+
+      '<path d="M10 2.4l2.35 4.76 5.25.76-3.8 3.7.9 5.23L10 14.35l-4.7 2.5.9-5.23-3.8-3.7 5.25-.76L10 2.4z" '+
+      'stroke="'+(on?"var(--yellow)":"#C3C6D4")+'" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+  function starCell(r, yearSet){
+    var on=isStarred(r, yearSet);
+    return '<td class="star"><button class="starbtn'+(on?" on":"")+'" data-star="'+r._id+'" title="'+
+      (on?"Starred for the year-end report — click to remove":"Star for the year-end report")+'">'+starSvg(on)+'</button></td>';
+  }
+  function updateYearTab(n){
+    var tab=document.querySelector('.tab[data-view="year"]');
+    if(tab) tab.textContent="Year in review"+(n?" ("+n+")":"");
+  }
 
   /* ---------------- parsing ---------------- */
   var KEY_RE = /^[A-Z][A-Z0-9]+-\d+$/;
@@ -755,8 +1046,26 @@ tr.detail:hover td{background:var(--card)}
 
   /* ---------------- derived ---------------- */
   function visibleRows(){
-    if(!state.mineOnly||!state.owner) return state.rows;
-    return state.rows.filter(function(r){return same(r.reporter,state.owner)||same(r.pm,state.owner);});
+    var rows = state.rows;
+    if(state.mineOnly && state.owner) rows = rows.filter(function(r){return same(r.reporter,state.owner)||same(r.pm,state.owner);});
+    if(state.pmFilter) rows = rows.filter(function(r){return same(r.pm,state.pmFilter);});
+    return rows;
+  }
+  function pmOptionsList(){
+    var seen={}, out=[];
+    state.rows.forEach(function(r){
+      var v=norm(r.pm);
+      if(v && !seen[v.toLowerCase()]){ seen[v.toLowerCase()]=true; out.push(v); }
+    });
+    return out.sort(function(a,b){return a.localeCompare(b);});
+  }
+  function refreshPmFilter(){
+    var sel=$("filterPm"), names=pmOptionsList(), cur=state.pmFilter;
+    var keep = cur && names.some(function(n){return same(n,cur);});
+    sel.innerHTML = '<option value="">All product managers</option>'+
+      names.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join("");
+    sel.value = keep ? cur : "";
+    if(!keep && cur){ state.pmFilter=""; }
   }
   function groupKeyOf(r){
     switch(state.groupBy){
@@ -764,16 +1073,24 @@ tr.detail:hover td{background:var(--card)}
       case "portfolio": return r.portfolio||"No portfolio";
       case "priority": return r.priority||"No priority";
       case "reporter": return r.reporter||"No reporter";
+      case "pm": return r.pm||"No product manager";
+      case "month": return r._period||"No month";
       case "none": return "All items";
       default: return r.fix||"No release";
     }
   }
   function grouped(rows){
-    var map={},order=[];
-    rows.forEach(function(r){var g=groupKeyOf(r);if(!map[g]){map[g]=[];order.push(g);}map[g].push(r);});
+    var map={},order=[],tsByGroup={};
+    rows.forEach(function(r){
+      var g=groupKeyOf(r);
+      if(!map[g]){map[g]=[];order.push(g);}
+      map[g].push(r);
+      if(state.groupBy==="month") tsByGroup[g]=Math.max(tsByGroup[g]||0, r._periodTs||0);
+    });
     order.sort(function(a,b){
       var na=/^No /.test(a),nb=/^No /.test(b);
       if(na!==nb) return na?1:-1;
+      if(state.groupBy==="month") return (tsByGroup[b]||0)-(tsByGroup[a]||0);
       return b.localeCompare(a,undefined,{numeric:true});
     });
     return order.map(function(g){return {name:g,rows:map[g]};});
@@ -840,6 +1157,7 @@ tr.detail:hover td{background:var(--card)}
         '<p>Copy the rows out of your Jira table and paste them into board setup. Every cell stays editable afterwards. Try <b>Load sample</b> to see the shape first.</p></div>';
       $("updates").innerHTML=""; return;
     }
+    var yearSet={}; loadYear().forEach(function(e){ yearSet[e.id]=true; });
     var html = "";
     grouped(rows).forEach(function(g,gi){
       var col = GCOL[gi%GCOL.length];
@@ -853,7 +1171,7 @@ tr.detail:hover td{background:var(--card)}
         '<span class="gcount">'+g.rows.length+' item'+(g.rows.length===1?"":"s")+'</span>'+
       '</div>';
       html += '<div class="gwrap"><div class="scroller"><table class="bd"><thead><tr>'+
-        '<th style="width:6px;padding:0"></th><th>Item</th><th class="mid bubh" title="What we were solving, what shipped, impact">Writeup</th><th class="mid">Priority</th>'+
+        '<th style="width:6px;padding:0"></th><th>Item</th><th class="mid" title="Star for the year-end report">Star</th><th class="mid bubh" title="What we were solving, what shipped, impact">Writeup</th><th class="mid">Priority</th>'+
         '<th class="mid">Reporter</th><th class="mid">WO</th><th class="mid">QA</th><th class="mid">UX</th><th class="mid">PM</th>'+
         '<th>Portfolio</th><th>Sprint</th><th>Release</th><th style="width:34px"></th></tr></thead><tbody>';
 
@@ -870,6 +1188,7 @@ tr.detail:hover td{background:var(--card)}
           '<td class="bar" style="background:'+col+'"></td>'+
           '<td class="name"><div contenteditable="plaintext-only" data-i="'+i+'" data-f="summary">'+esc(r.summary||"")+'</div>'+keyHtml+
             (isMine?' <span class="pill" style="background:#E3FCEF;color:#00854D;height:18px;font-size:11px">yours</span>':"")+'</td>'+
+          starCell(r, yearSet)+
           bubbleCell(r)+
           '<td class="status" data-label="Priority"><button class="statuscell '+(pk?"":"empty")+'" data-pri="'+i+'" style="background:'+(pk?PRI[pk].c:"#C4C4C4")+'">'+esc(r.priority||"Set")+'</button></td>'+
           personCell(r,"reporter",i)+personCell(r,"wo",i)+personCell(r,"qa",i)+personCell(r,"ux",i)+personCell(r,"pm",i)+
@@ -915,7 +1234,7 @@ tr.detail:hover td{background:var(--card)}
     };
     return '<tr class="detail'+(open?" on":"")+(filled?"":" blank")+'" data-row="'+r._id+'">'+
       '<td class="bar" style="background:'+col+'"></td>'+
-      '<td colspan="12"><div class="story">'+
+      '<td colspan="13"><div class="story">'+
         box("why","problem","The problem, the complaint, the number that was off. Why this was worth a sprint.")+
         box("did","done","What we actually built and where it lives now.")+
         box("imp","impact","The metric or behavior to check next month.")+
@@ -1123,6 +1442,86 @@ tr.detail:hover td{background:var(--card)}
     host.innerHTML = html;
   }
 
+  // Lets a writeup be added or edited right from Year in review, not just from
+  // the main board — same contenteditable pattern as storyRow's boxes, keyed
+  // by the starred entry's id instead of a board row index.
+  function yearBox(e,cls,f,ph){
+    return '<div class="sbox '+cls+'"><div class="slabel">'+esc(LABELS[f])+'</div>'+
+      '<div class="sedit" contenteditable="plaintext-only" data-yid="'+esc(e.id)+'" data-yf="'+f+'" data-ph="'+esc(ph)+'">'+esc(e[f])+'</div></div>';
+  }
+
+  function renderYear(){
+    var host=$("yearview"), list=loadYear();
+    updateYearTab(list.length);
+    if(!list.length){
+      host.innerHTML = '<div class="empty">'+EICON_STAR+'<h3>No starred items yet</h3>'+
+        '<p>Click the star next to any ticket on the main board to save it here for your end-of-year report — it stays even after you build next month\'s board.</p></div>';
+      return;
+    }
+    var byPeriod={}, order=[];
+    list.forEach(function(e){
+      var p=e.period||"No period";
+      if(!byPeriod[p]){byPeriod[p]=[];order.push(p);}
+      byPeriod[p].push(e);
+    });
+    order.sort(function(a,b){ return (Date.parse(b)||0)-(Date.parse(a)||0); });
+
+    var html = '<div class="card" style="margin-top:16px"><div class="card-head">'+
+      '<h2>End of year report</h2>'+
+      '<span class="hint">'+list.length+' starred item'+(list.length===1?"":"s")+' across '+order.length+' month'+(order.length===1?"":"s")+'</span>'+
+      '<button class="btn outline no-print" id="btnYearMd">Copy as Markdown</button>'+
+      '<button class="btn outline no-print" id="btnYearCsv">Download CSV</button>'+
+    '</div></div>';
+
+    html += '<div class="feedwrap" style="margin-top:16px">';
+    order.forEach(function(p){
+      html += '<div class="fgroup">'+esc(p)+' · '+byPeriod[p].length+' item'+(byPeriod[p].length===1?"":"s")+'</div>';
+      byPeriod[p].forEach(function(e){
+        var pk=priKey(e.priority);
+        html += '<div class="fitem"><div class="fhead"><div>'+
+          '<div class="ft">'+esc(e.summary||"Untitled")+'</div>'+
+          (e.key?'<span class="fk">'+esc(e.key)+'</span>':'')+'</div>'+
+          '<div class="right">'+
+            (pk?'<span class="pill" style="background:'+PRI[pk].c+';color:#fff">'+esc(e.priority)+'</span>':"")+
+            (e.fix?'<span class="pill rel">'+esc(e.fix)+'</span>':"")+
+            '<button class="bubble no-print" data-unstar="'+esc(e.id)+'" title="Remove from the year-end report">'+starSvg(true)+'</button>'+
+          '</div></div>'+
+          '<div class="fbody">'+
+            yearBox(e,"why","problem","The problem, the complaint, the number that was off. Why this was worth a sprint.")+
+            yearBox(e,"did","done","What we actually built and where it lives now.")+
+            yearBox(e,"imp","impact","The metric or behavior to check next month.")+
+          '</div>'+
+        '</div>';
+      });
+    });
+    html += '</div>';
+    host.innerHTML = html;
+
+    var b1=$("btnYearMd"); if(b1) b1.addEventListener("click",function(){ copy(yearMarkdown(list,order,byPeriod), this); });
+    var b2=$("btnYearCsv"); if(b2) b2.addEventListener("click",function(){ download("year-end-report.csv", yearCsv(list), "text/csv"); });
+  }
+  function yearMarkdown(list,order,byPeriod){
+    var out=["# End of year report"];
+    order.forEach(function(p){
+      out.push(""); out.push("## "+p+" ("+byPeriod[p].length+")");
+      byPeriod[p].forEach(function(e){
+        var line="- **"+(e.key||"—")+"**"+(e.priority?" · "+e.priority:"")+" · "+(e.summary||"Untitled");
+        out.push(line);
+        ["problem","done","impact"].forEach(function(f){
+          if(norm(e[f])) out.push("  - *"+LABELS[f]+":* "+String(e[f]).replace(/\n+/g," "));
+        });
+      });
+    });
+    return out.join("\n");
+  }
+  function yearCsv(list){
+    var fields=["period","key","priority","summary","portfolio","reporter","fix","sprint","problem","done","impact"];
+    var q=function(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+    var lines=[fields.map(function(f){return f==="fix"?"Fix Version/s":f.charAt(0).toUpperCase()+f.slice(1);}).join(",")];
+    list.forEach(function(e){ lines.push(fields.map(function(f){return q(e[f]);}).join(",")); });
+    return lines.join("\n");
+  }
+
   function setView(v){
     state.view = v;
     var tabs = document.querySelectorAll(".tab");
@@ -1131,16 +1530,20 @@ tr.detail:hover td{background:var(--card)}
   }
 
   function render(){
+    scheduleBoardSync();
     renderHead();
-    var b = state.view==="board", d = state.view==="dash", u = state.view==="updates";
+    refreshPmFilter();
+    var b = state.view==="board", d = state.view==="dash", u = state.view==="updates", y = state.view==="year";
     $("dash").style.display = b?"":"none";
     $("board").style.display = b?"":"none";
     $("updates").style.display = b?"":"none";
     $("charts").style.display = d?"":"none";
     $("feed").style.display = u?"":"none";
+    $("yearview").style.display = y?"":"none";
     if(b){ renderDash(); renderBoard(); }
     else if(d){ renderCharts(); }
-    else { renderFeed(); }
+    else if(u){ renderFeed(); }
+    else { renderYear(); }
   }
 
   /* ---------------- interactions ---------------- */
@@ -1149,13 +1552,17 @@ tr.detail:hover td{background:var(--card)}
     if(el.dataset && el.dataset.note){
       state.note = el.textContent.replace(/\u00a0/g," ");
       $("note").value = state.note;
+      scheduleBoardSync();
       return;
     }
     if(el.dataset && el.dataset.f!==undefined && el.dataset.i!==undefined){
       var r=state.rows[+el.dataset.i];
       if(r){
+        var oldYearId=yearId(r);
         r[el.dataset.f]= NOTE_FIELDS.indexOf(el.dataset.f)>-1 ? el.textContent.replace(/\u00a0/g," ") : norm(el.textContent);
         r._flag=false;
+        refreshYearEntry(r, oldYearId);
+        scheduleBoardSync();
         if(NOTE_FIELDS.indexOf(el.dataset.f)>-1){
           var host=document.querySelector('[data-open="'+r._id+'"]');
           if(host){
@@ -1167,6 +1574,20 @@ tr.detail:hover td{background:var(--card)}
           var tr2=document.querySelector('tr[data-row="'+r._id+'"]');
           if(tr2) tr2.classList.toggle("blank", !hasStory(r));
         }
+      }
+      return;
+    }
+    if(el.dataset && el.dataset.yid!==undefined && el.dataset.yf!==undefined){
+      var list=loadYear(), idx=-1;
+      list.forEach(function(en,k){ if(en.id===el.dataset.yid) idx=k; });
+      if(idx>-1){
+        var text = el.textContent.replace(/\u00a0/g," ");
+        list[idx][el.dataset.yf] = text;
+        saveYear(list);
+        // Keep the board row in sync too, if this item is on the current board.
+        var br=null;
+        for(var k2=0;k2<state.rows.length;k2++){ if(yearId(state.rows[k2])===el.dataset.yid){ br=state.rows[k2]; break; } }
+        if(br){ br[el.dataset.yf]=text; scheduleBoardSync(); }
       }
     }
   });
@@ -1202,6 +1623,21 @@ tr.detail:hover td{background:var(--card)}
       return;
     }
 
+    var st = t.closest && t.closest("[data-star]");
+    if(st){
+      toggleStar(st.dataset.star);
+      if(state.view==="year") renderYear(); else renderBoard();
+      return;
+    }
+
+    var us = t.closest && t.closest("[data-unstar]");
+    if(us){
+      var list=loadYear(), rid=us.dataset.unstar;
+      list=list.filter(function(e){return e.id!==rid;});
+      saveYear(list); updateYearTab(list.length); renderYear();
+      return;
+    }
+
     var op = t.closest && t.closest("[data-open]");
     if(op){
       var id = op.dataset.open;
@@ -1222,8 +1658,11 @@ tr.detail:hover td{background:var(--card)}
       var r=blank();
       var gname=add.dataset.add;
       if(state.groupBy!=="none" && !/^No /.test(gname)){
-        var f = state.groupBy==="fix"?"fix":state.groupBy;
-        r[f]=gname;
+        if(state.groupBy==="month") r._period=gname;
+        else{
+          var f = state.groupBy==="fix"?"fix":state.groupBy;
+          r[f]=gname;
+        }
       }
       if(state.owner){ r.reporter=state.owner; r.pm=state.owner; }
       state.rows.push(r); render();
@@ -1703,7 +2142,12 @@ tr.detail:hover td{background:var(--card)}
     },
     set: function(key, value){
       try{ window.localStorage.setItem(key, value); }catch(e){ return Promise.reject(e); }
-      return Promise.resolve();
+      if(key===IDX && !cloudSuppressed && window.MonthlyCloud){
+        return window.MonthlyCloud.syncUp()
+          .then(function(){ return {cloudSynced:true}; })
+          .catch(function(){ return {cloudSynced:false}; });
+      }
+      return Promise.resolve({cloudSynced:null});
     }
   };
   var IDX="board:index";
@@ -1742,17 +2186,359 @@ tr.detail:hover td{background:var(--card)}
       }
     });
   });
-  $("btnSave").addEventListener("click",function(){
-    if(!store){note("Saving isn't available here — export the CSV instead.");return;}
-    if(!state.rows.length){note("Add items before saving.");return;}
+  $("btnLoadAllArchive").addEventListener("click", function(){
     readIdx().then(function(list){
+      if(!list.length){ note("No saved months yet — nothing to load."); return; }
+      if(!window.confirm("Load all "+list.length+" saved month"+(list.length>1?"s":"")+" onto the board, grouped by month? This replaces what's currently on the board.")) return;
+      var combined=[];
+      list.forEach(function(m){
+        var ts = m.saved || Date.parse(m.period) || 0;
+        (m.rows||[]).forEach(function(o){
+          var r=blank();
+          ALL_FIELDS.forEach(function(f){if(o[f]!==undefined)r[f]=o[f];});
+          r._period = m.period || "Untitled";
+          r._periodTs = ts;
+          combined.push(r);
+        });
+      });
+      state.rows=combined; state.open={}; state.closed={};
+      state.groupBy="month"; $("groupBy").value="month";
+      setView("board");
+      note("Loaded "+list.length+" saved month"+(list.length>1?"s":"")+" onto the board, grouped by month.");
+    });
+  });
+  // Shared by the manual "Save this month" button and the session-timeout
+  // auto-save below, so the two stay in sync.
+  function saveCurrentMonth(){
+    if(!store || !state.rows.length) return Promise.resolve({saved:false});
+    return readIdx().then(function(list){
       var e={period:state.period||new Date().toLocaleDateString(undefined,{month:"long",year:"numeric"}),note:state.note,rows:state.rows,saved:Date.now()};
       var ix=-1;
       list.forEach(function(m,k){if(same(m.period,e.period))ix=k;});
       if(ix>-1)list[ix]=e;else list.unshift(e);
       return store.set(IDX,JSON.stringify(list.slice(0,24)));
-    }).then(function(){drawIdx();note("Saved.");}).catch(function(){note("That didn't save — export the CSV as a backup.");});
+    }).then(function(result){
+      return {saved:true, cloudSynced: result && result.cloudSynced};
+    });
+  }
+  $("btnSave").addEventListener("click",function(){
+    if(!store){note("Saving isn't available here — export the CSV instead.");return;}
+    if(!state.rows.length){note("Add items before saving.");return;}
+    saveCurrentMonth().then(function(result){
+      drawIdx();
+      if(result.cloudSynced===false) note("Saved on this device, but couldn't sync to your account right now.");
+      else note("Saved.");
+    }).catch(function(){note("That didn't save — export the CSV as a backup.");});
   });
+
+  /* ---------------- saved months: CSV backup / restore ----------------
+     A portable, human-readable backup of every saved month — independent
+     of localStorage and the Firestore sync, so there's still a way back
+     if the browser's storage (and thus board:index) ever gets cleared. */
+  function csvQuote(v){ v=String(v==null?"":v); return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+  function csvFromArchive(list){
+    var headerCols=["Period","Month Note","Saved At"].concat(ALL_FIELDS.map(function(f){return LABELS[f];}));
+    var lines=[headerCols.map(csvQuote).join(",")];
+    (list||[]).forEach(function(m){
+      var savedAt = m.saved ? new Date(m.saved).toISOString() : "";
+      (m.rows||[]).forEach(function(r){
+        var cells=[m.period||"", m.note||"", savedAt].concat(ALL_FIELDS.map(function(f){return r[f];}));
+        lines.push(cells.map(csvQuote).join(","));
+      });
+    });
+    return lines.join("\r\n");
+  }
+  // A real CSV parser (not just split-by-line): writeups can contain
+  // newlines, and a naive line-splitter would corrupt those cells.
+  function parseCsvTable(text){
+    var rows=[], row=[], cur="", inQ=false, i=0, n=text.length;
+    while(i<n){
+      var c=text[i];
+      if(inQ){
+        if(c==='"'){ if(text[i+1]==='"'){ cur+='"'; i+=2; continue; } inQ=false; i++; continue; }
+        cur+=c; i++; continue;
+      }
+      if(c==='"'){ inQ=true; i++; continue; }
+      if(c===','){ row.push(cur); cur=""; i++; continue; }
+      if(c==='\r'){ i++; continue; }
+      if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=""; i++; continue; }
+      cur+=c; i++;
+    }
+    row.push(cur); rows.push(row);
+    if(rows.length && rows[rows.length-1].length===1 && rows[rows.length-1][0]==="") rows.pop();
+    return rows;
+  }
+  function archiveFromCsv(text){
+    var table=parseCsvTable(text);
+    if(!table.length) return {months:[], warn:["The file was empty."]};
+    var header=table[0].map(norm), idx={};
+    header.forEach(function(h,i){ idx[h]=i; });
+    if(idx["Period"]===undefined) return {months:[], warn:["That doesn't look like a saved-months CSV — missing a \"Period\" column."]};
+
+    var byPeriod={}, order=[];
+    for(var r=1;r<table.length;r++){
+      var cells=table[r];
+      if(cells.length===1 && norm(cells[0])==="") continue;
+      var period=norm(cells[idx["Period"]]);
+      if(!period) continue;
+      if(!byPeriod[period]){
+        var savedRaw = idx["Saved At"]!==undefined ? cells[idx["Saved At"]] : "";
+        byPeriod[period] = {
+          period: period,
+          note: idx["Month Note"]!==undefined ? (cells[idx["Month Note"]]||"") : "",
+          saved: savedRaw && Date.parse(savedRaw) ? Date.parse(savedRaw) : Date.now(),
+          rows: []
+        };
+        order.push(period);
+      }
+      var row=blank();
+      ALL_FIELDS.forEach(function(f){
+        var label=LABELS[f];
+        if(idx[label]!==undefined) row[f]=cells[idx[label]]||"";
+      });
+      if(row.key || row.summary) byPeriod[period].rows.push(row);
+    }
+    var months=order.map(function(p){return byPeriod[p];}).filter(function(m){return m.rows.length;});
+    return {months:months, warn:[]};
+  }
+  $("btnExportArchive").addEventListener("click", function(){
+    readIdx().then(function(list){
+      if(!list.length){ note("No saved months yet — nothing to export."); return; }
+      download("saved-months-backup.csv", csvFromArchive(list), "text/csv");
+    });
+  });
+  $("btnImportArchive").addEventListener("click", function(){ $("archiveCsvFile").click(); });
+  $("archiveCsvFile").addEventListener("change", function(){
+    var file = this.files && this.files[0];
+    this.value = ""; // allow re-selecting the same file later
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var result = archiveFromCsv(String(reader.result||""));
+      if(result.warn.length){ note(result.warn.join(" ")); return; }
+      if(!result.months.length){ note("No saved months found in that file."); return; }
+      var plural = result.months.length>1 ? "s" : "";
+      if(!window.confirm("Import "+result.months.length+" saved month"+plural+" from this file? Any existing saved month with the same period will be overwritten.")) return;
+      readIdx().then(function(list){
+        result.months.forEach(function(m){
+          var ix=-1; list.forEach(function(existing,k){ if(same(existing.period,m.period)) ix=k; });
+          if(ix>-1) list[ix]=m; else list.unshift(m);
+        });
+        return store.set(IDX, JSON.stringify(list.slice(0,24)));
+      }).then(function(syncResult){
+        drawIdx();
+        note("Imported "+result.months.length+" saved month"+plural+"."+
+          (syncResult && syncResult.cloudSynced===false ? " Saved on this device, but couldn't sync to your account right now." : ""));
+      }).catch(function(){ note("That import didn't go through."); });
+    };
+    reader.onerror = function(){ note("Couldn't read that file."); };
+    reader.readAsText(file);
+  });
+
+  /* ---------------- shared team storage ---------------- */
+  var TEAM_CODE_KEY="board:teamcode";
+  try{ $("teamCode").value = window.localStorage.getItem(TEAM_CODE_KEY) || ""; }catch(e){}
+  function teamBusy(btn, busyLabel){
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = busyLabel;
+    return function(){ btn.disabled = false; btn.textContent = label; };
+  }
+  $("btnTeamPush").addEventListener("click", function(){
+    var id = norm($("teamCode").value);
+    if(!id){ note("Enter a shared board code first — agree on one with your team."); return; }
+    try{ window.localStorage.setItem(TEAM_CODE_KEY, id); }catch(e){}
+    var done = teamBusy(this, "Pushing…");
+    readIdx().then(function(archive){
+      var payload = {
+        savedAt: Date.now(), savedBy: state.owner||"",
+        board: {period:state.period, owner:state.owner, jiraBase:state.jiraBase, note:state.note, rows:state.rows},
+        archive: archive, year: loadYear()
+      };
+      return fetch("/api/team?id="+encodeURIComponent(id), {
+        method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)
+      });
+    }).then(function(r){ return r.json().catch(function(){return null;}); })
+      .then(function(j){
+        if(j && j.ok) note("Pushed to shared board \""+id+"\". Teammates can pull it with the same code.");
+        else note((j&&j.error) || "That didn't push — try again.");
+      })
+      .catch(function(){ note("Couldn't reach shared storage. If this is the GitHub Pages copy, shared storage only works on the Vercel deployment."); })
+      .then(done);
+  });
+  $("btnTeamPull").addEventListener("click", function(){
+    var id = norm($("teamCode").value);
+    if(!id){ note("Enter the shared board code your teammate used."); return; }
+    if(!window.confirm('Pull the shared board "'+id+'"? This replaces the board, saved months, and starred items currently in this browser.')) return;
+    try{ window.localStorage.setItem(TEAM_CODE_KEY, id); }catch(e){}
+    var done = teamBusy(this, "Pulling…");
+    fetch("/api/team?id="+encodeURIComponent(id))
+      .then(function(r){ return r.json().catch(function(){return null;}); })
+      .then(function(j){
+        if(!j || !j.ok){ note((j&&j.error) || "Couldn't load the shared board."); return; }
+        if(!j.data){ note("Nothing has been pushed to \""+id+"\" yet."); return; }
+        var d = j.data, b = d.board||{};
+        state.rows = (b.rows||[]).map(function(o){
+          var r=blank(); ALL_FIELDS.forEach(function(f){if(o[f]!==undefined)r[f]=o[f];}); return r;
+        });
+        state.open={}; state.period=b.period||""; state.owner=b.owner||""; state.jiraBase=b.jiraBase||""; state.note=b.note||"";
+        ensurePeriodValue(state.period);
+        $("owner").value=state.owner; $("jiraBase").value=state.jiraBase; $("note").value=state.note;
+        return store.set(IDX, JSON.stringify(d.archive||[])).then(function(){
+          saveYear(d.year||[]);
+          render(); drawIdx(); updateYearTab((d.year||[]).length);
+          note("Pulled the shared board \""+id+"\" (saved "+new Date(d.savedAt||Date.now()).toLocaleString()+").");
+        });
+      })
+      .catch(function(){ note("Couldn't reach shared storage. If this is the GitHub Pages copy, shared storage only works on the Vercel deployment."); })
+      .then(done);
+  });
+
+  /* ---------------- account (Firebase sign-in gate) ---------------- */
+  function friendlyAuthError(err){
+    var code = err && err.code;
+    if(code==="custom/domain") return err.message;
+    if(code==="auth/invalid-email") return "That doesn't look like a valid email address.";
+    if(code==="auth/missing-password" || code==="auth/weak-password") return "Password must be at least 6 characters.";
+    if(code==="auth/email-already-in-use") return "An account already exists for that email — sign in instead.";
+    if(code==="auth/invalid-credential" || code==="auth/wrong-password" || code==="auth/user-not-found") return "Email or password is incorrect.";
+    if(code==="auth/too-many-requests") return "Too many attempts — wait a bit and try again.";
+    return (err && err.message) || "Something went wrong. Try again.";
+  }
+
+  function applyCloudDoc(archive, year, board){
+    cloudSuppressed = true;
+    store.set(IDX, JSON.stringify(archive||[])).then(function(){
+      saveYear(year||[]);
+      var hasBoard = board && board.rows && board.rows.length;
+      if(hasBoard){
+        applyBoardSnapshot(board);
+        try{ window.localStorage.setItem(CURRENT_KEY, JSON.stringify(board)); }catch(e){}
+        render();
+      }
+      drawIdx(); updateYearTab((year||[]).length);
+      note("Loaded your saved months, starred items"+(hasBoard?", and current board":"")+" from your account.");
+    }).then(function(){ cloudSuppressed = false; });
+  }
+
+  function renderAccountChip(user){
+    var el = $("cloudAuth");
+    if(!el) return;
+    el.innerHTML = avatar(user.email, "Signed in") +
+      '<span class="hint">'+esc(user.email)+'</span>' +
+      '<button type="button" class="btn" id="authSignOutToolbar">Sign out</button>';
+    var out = $("authSignOutToolbar");
+    if(out) out.addEventListener("click", function(){ manualSignOut(); });
+  }
+
+  function showAuthView(view){
+    $("authLoading").hidden = view!=="loading";
+    $("authLoginForm").hidden = view!=="login";
+    $("authVerify").hidden = view!=="verify";
+    $("authGate").hidden = view==="app";
+  }
+
+  /* ---- 4-hour absolute session timeout ----
+     Firebase itself keeps the sign-in around indefinitely (browserLocalPersistence,
+     its default) so reloading the page never re-prompts for a login on its own.
+     This is a separate, app-level timer: it starts once at actual sign-in and
+     forces a sign-out (auto-saving first) 4 hours later, regardless of activity,
+     surviving page reloads since it's anchored to a stored timestamp rather than
+     a JS timer. */
+  var SESSION_KEY = "board:sessionStart";
+  var SESSION_MS = 4*60*60*1000;
+  var sessionTimer = null;
+
+  function ensureSessionStart(){
+    var v = null;
+    try{ v = window.localStorage.getItem(SESSION_KEY); }catch(e){}
+    if(!v){
+      v = String(Date.now());
+      try{ window.localStorage.setItem(SESSION_KEY, v); }catch(e){}
+    }
+    return Number(v);
+  }
+  function clearSessionStart(){ try{ window.localStorage.removeItem(SESSION_KEY); }catch(e){} }
+  function stopSessionTimer(){ if(sessionTimer){ clearInterval(sessionTimer); sessionTimer=null; } }
+  function startSessionTimer(){
+    var start = ensureSessionStart();
+    if(Date.now()-start >= SESSION_MS){ autoSaveAndSignOut(); return; }
+    stopSessionTimer();
+    sessionTimer = setInterval(function(){
+      if(Date.now()-start >= SESSION_MS) autoSaveAndSignOut();
+    }, 60000);
+  }
+  function manualSignOut(){
+    stopSessionTimer(); clearSessionStart();
+    window.MonthlyCloud.signOut();
+  }
+  function autoSaveAndSignOut(){
+    stopSessionTimer();
+    if(boardSyncTimer){ clearTimeout(boardSyncTimer); boardSyncTimer=null; }
+    try{ window.localStorage.setItem(CURRENT_KEY, JSON.stringify(currentBoardSnapshot())); }catch(e){}
+    saveCurrentMonth().catch(function(){}).then(function(){
+      return window.MonthlyCloud.syncUp();
+    }).catch(function(){}).then(function(){
+      clearSessionStart();
+      return window.MonthlyCloud.signOut();
+    }).then(function(){
+      drawIdx();
+      $("authNotice").textContent = "You were signed out after 4 hours — your board was auto-saved to Saved months.";
+    });
+  }
+
+  function handleCloudAuth(user, errMsg){
+    if(errMsg){ stopSessionTimer(); showAuthView("login"); $("authNotice").textContent = errMsg; return; }
+    if(!user){ stopSessionTimer(); showAuthView("login"); return; }
+    if(!user.emailVerified){
+      stopSessionTimer();
+      $("authVerifyEmail").textContent = user.email;
+      showAuthView("verify");
+      return;
+    }
+    showAuthView("app");
+    renderAccountChip(user);
+    startSessionTimer();
+    window.MonthlyCloud.syncDown().then(function(cloudDoc){
+      if(!cloudDoc) return;
+      var hasBoard = cloudDoc.board && cloudDoc.board.rows && cloudDoc.board.rows.length;
+      var msg = "Load your saved months, starred items"+(hasBoard?", and current board":"")+
+        " from your account? This replaces what's currently in this browser.";
+      if(!window.confirm(msg)) return;
+      applyCloudDoc(cloudDoc.archive, cloudDoc.year, cloudDoc.board);
+    });
+  }
+
+  $("authLoginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    $("authNotice").textContent = "";
+    window.MonthlyCloud.signIn($("authEmail").value, $("authPassword").value)
+      .catch(function(err){ $("authNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authSignUp").addEventListener("click", function(){
+    $("authNotice").textContent = "";
+    window.MonthlyCloud.signUp($("authEmail").value, $("authPassword").value)
+      .catch(function(err){ $("authNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authForgot").addEventListener("click", function(){
+    var email = $("authEmail").value;
+    if(!email){ $("authNotice").textContent = "Enter your email above first."; return; }
+    window.MonthlyCloud.resetPassword(email)
+      .then(function(){ $("authNotice").textContent = "Password reset email sent."; })
+      .catch(function(err){ $("authNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authContinue").addEventListener("click", function(){
+    $("authVerifyNotice").textContent = "";
+    window.MonthlyCloud.reloadUser().then(function(user){
+      if(user && user.emailVerified) handleCloudAuth(user);
+      else $("authVerifyNotice").textContent = "Still not verified — check your email and try again.";
+    });
+  });
+  $("authResend").addEventListener("click", function(){
+    window.MonthlyCloud.resendVerification()
+      .then(function(){ $("authVerifyNotice").textContent = "Verification email sent again."; })
+      .catch(function(err){ $("authVerifyNotice").textContent = friendlyAuthError(err); });
+  });
+  $("authSignOut").addEventListener("click", function(){ manualSignOut(); });
 
   /* ---------------- wiring ---------------- */
   function monthLabel(d){ return d.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
@@ -1785,6 +2571,7 @@ tr.detail:hover td{background:var(--card)}
     $(id).addEventListener("input",function(){pull();render();});
   });
   $("groupBy").addEventListener("change",function(){pull();state.closed={};render();});
+  $("filterPm").addEventListener("change",function(){ state.pmFilter=this.value; state.closed={}; render(); });
   $("btnMine").addEventListener("click",function(){
     state.mineOnly=!state.mineOnly;
     this.classList.toggle("on",state.mineOnly);
@@ -1869,9 +2656,21 @@ tr.detail:hover td{background:var(--card)}
   $("btnMine").innerHTML='<span class="ico">◍</span> Person: everyone';
   $("ovl").hidden=true;
   document.body.style.overflow="";
+  // Restore the current (unsaved) board first, so the pull() right after just
+  // re-reads the same values back out of the form fields it was just given —
+  // a no-op when there's nothing to restore, unchanged from before.
+  restoreCurrentBoardFromLocal();
   pull();
   setView("board");
   drawIdx();
+  updateYearTab(loadYear().length);
+
+  function initCloud(){
+    showAuthView("loading");
+    window.MonthlyCloud.onAuthChange(handleCloudAuth);
+  }
+  if(window.MonthlyCloud) initCloud();
+  else window.addEventListener("monthlycloud:ready", initCloud, {once:true});
 })();
 </script>
 </body>
